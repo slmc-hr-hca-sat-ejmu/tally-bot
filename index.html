@@ -4,22 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GSheets Evaluation & Sentiment Analyzer</title>
-    <!-- Tailwind CSS CDN for modern UI styling -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen pb-12">
 
-    <!-- Header Section -->
     <header class="bg-blue-600 text-white py-6 shadow-md mb-8">
         <div class="container mx-auto px-4">
             <h1 class="text-3xl font-bold flex items-center gap-2">📊 Evaluation & Sentiment Analyzer</h1>
-            <p class="text-blue-100 mt-1 text-sm md:text-base">Copy-paste data directly from Google Sheets to calculate metrics and sort feedback instantly.</p>
+            <p class="text-blue-100 mt-1 text-sm md:text-base">Tailored for your specific Google Sheets evaluation form headers (Out of 6.00).</p>
         </div>
     </header>
 
     <main class="container mx-auto px-4 max-w-6xl">
         
-        <!-- Step 1: Input Section -->
         <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 1. Paste Your Google Sheets Data</h2>
             <p class="text-gray-500 text-xs mb-4">Highlight your rows (including the header row) in Google Sheets, copy (Ctrl+C), and paste below.</p>
@@ -27,257 +24,18 @@
             <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer">Process Data</button>
         </section>
 
-        <!-- Hidden by default, shown when data is parsed -->
         <div id="dashboard" class="hidden">
             
-            <!-- Step 2: Dynamic Column Mapping -->
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-                <h2 class="text-lg font-semibold mb-1 text-blue-600">🔍 2. Map Your Spreadsheet Columns</h2>
-                <p class="text-gray-500 text-xs mb-4">Match the program/speaker targets to your sheet's column headings.</p>
+                <h2 class="text-lg font-semibold mb-1 text-blue-600">🔍 2. Verify Your Mapped Spreadsheet Columns</h2>
+                <p class="text-gray-500 text-xs mb-4">The app has auto-matched your columns. Adjust if needed, then run the analysis.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Program Mapping -->
                     <div class="bg-gray-50 p-4 rounded-md border border-gray-100">
                         <h3 class="font-bold text-gray-700 mb-3 border-b pb-1">🏫 Program Evaluation Setup</h3>
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q1: Expected knowledge/skills delivered</label>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Q1: The program was able to achieve its objectives.</label>
                                 <select id="q1_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q2: Effective management by facilitator</label>
-                                <select id="q2_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Program Comments</label>
-                                <select id="prog_comm_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Speaker Mapping -->
-                    <div class="bg-gray-50 p-4 rounded-md border border-gray-100">
-                        <h3 class="font-bold text-gray-700 mb-3 border-b pb-1">🎙️ Speaker Evaluation Setup</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q3: Subject matter effectively presented</label>
-                                <select id="q3_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q4: Knowledgeable of the subject matter</label>
-                                <select id="q4_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q5: Encouraged participation & questions</label>
-                                <select id="q5_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Speaker Comments</label>
-                                <select id="spk_comm_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm"></select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button id="calculateBtn" class="mt-5 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer w-full md:w-auto">Run Calculations & Analysis</button>
-            </section>
-
-            <!-- Step 3: Metrics Output Display -->
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <!-- Program Score Card -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-blue-500 border-gray-200 text-center">
-                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Program Evaluation Average</span>
-                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q1 & Q2)</h3>
-                    <div id="progScoreDisplay" class="text-4xl font-extrabold text-blue-600 mt-2">0.00 / 5.00</div>
-                </div>
-                <!-- Speaker Score Card -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-purple-500 border-gray-200 text-center">
-                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Speaker Evaluation Average</span>
-                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q3, Q4, & Q5)</h3>
-                    <div id="spkScoreDisplay" class="text-4xl font-extrabold text-purple-600 mt-2">0.00 / 5.00</div>
-                </div>
-            </section>
-
-            <!-- Step 4: Comments Sentiment Buckets -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Program Comments Grouping -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2 flex items-center justify-between">
-                        <span>🏫 Program Feedback Breakdown</span>
-                    </h2>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">🟢 Positive Comments (<span id="progPosCount">0</span>)</h3>
-                            <ul id="progPosList" class="space-y-2 text-xs text-emerald-950 list-disc list-inside"></ul>
-                        </div>
-                        <div class="bg-rose-50 p-4 rounded-md border border-rose-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-rose-800 text-sm mb-2 flex items-center gap-1">🔴 Negative Comments (<span id="progNegCount">0</span>)</h3>
-                            <ul id="progNegList" class="space-y-2 text-xs text-rose-950 list-disc list-inside"></ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Speaker Comments Grouping -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2 flex items-center justify-between">
-                        <span>🎙️ Speaker Feedback Breakdown</span>
-                    </h2>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">🟢 Positive Comments (<span id="spkPosCount">0</span>)</h3>
-                            <ul id="spkPosList" class="space-y-2 text-xs text-emerald-950 list-disc list-inside"></ul>
-                        </div>
-                        <div class="bg-rose-50 p-4 rounded-md border border-rose-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-rose-800 text-sm mb-2 flex items-center gap-1">🔴 Negative Comments (<span id="spkNegCount">0</span>)</h3>
-                            <ul id="spkNegList" class="space-y-2 text-xs text-rose-950 list-disc list-inside"></ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-        </div>
-    </main>
-
-    <!-- JavaScript Data Logic Engine -->
-    <script>
-        let parsedData = [];
-        let headers = [];
-
-        // Basic structural Sentiment Vocabulary Classifier
-        const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned'];
-        const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast'];
-
-        function getSentiment(text) {
-            if (!text || text.trim() === "") return 'neutral';
-            const tokens = text.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
-            let score = 0;
-            tokens.forEach(word => {
-                if (posWords.includes(word)) score += 1;
-                if (negWords.includes(word)) score -= 1;
-            });
-            if (score > 0) return 'positive';
-            if (score < 0) return 'negative';
-            return 'neutral';
-        }
-
-        // Step 1: Parse the raw text string (TSV architecture)
-        document.getElementById('processBtn').addEventListener('click', () => {
-            const rawText = document.getElementById('pasteArea').value.trim();
-            if (!rawText) {
-                alert("Please paste some valid dataset lines first!");
-                return;
-            }
-
-            const lines = rawText.split('\n');
-            headers = lines[0].split('\t').map(h => h.trim());
-            
-            parsedData = [];
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cells = lines[i].split('\t');
-                let rowObj = {};
-                headers.forEach((header, idx) => {
-                    rowObj[header] = cells[idx] ? cells[idx].trim() : "";
-                });
-                parsedData.push(rowObj);
-            }
-
-            // Populate mapping dropdown pickers dynamically
-            const selects = document.querySelectorAll('.map-select');
-            selects.forEach((select, selectIdx) => {
-                select.innerHTML = '';
-                headers.forEach((header, hIdx) => {
-                    const opt = document.createElement('option');
-                    opt.value = header;
-                    opt.textContent = header;
-                    // Auto-select helper heuristics matching common column positions
-                    if (selectIdx === hIdx) opt.selected = true;
-                    select.appendChild(opt);
-                });
-            });
-
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
-        });
-
-        // Step 2: Extract mapping values, compile numerical scores, and filter comments
-        document.getElementById('calculateBtn').addEventListener('click', () => {
-            const q1K = document.getElementById('q1_map').value;
-            const q2K = document.getElementById('q2_map').value;
-            const q3K = document.getElementById('q3_map').value;
-            const q4K = document.getElementById('q4_map').value;
-            const q5K = document.getElementById('q5_map').value;
-            const progCommK = document.getElementById('prog_comm_map').value;
-            const spkCommK = document.getElementById('spk_comm_map').value;
-
-            let totalProgScore = 0, progCount = 0;
-            let totalSpkScore = 0, spkCount = 0;
-
-            const progPos = [], progNeg = [];
-            const spkPos = [], spkNeg = [];
-
-            parsedData.forEach(row => {
-                // Calculation Arrays
-                const q1V = parseFloat(row[q1K]);
-                const q2V = parseFloat(row[q2K]);
-                if (!isNaN(q1V) || !isNaN(q2V)) {
-                    const validVals = [q1V, q2V].filter(v => !isNaN(v));
-                    totalProgScore += (validVals.reduce((a,b)=>a+b, 0) / validVals.length);
-                    progCount++;
-                }
-
-                const q3V = parseFloat(row[q3K]);
-                const q4V = parseFloat(row[q4K]);
-                const q5V = parseFloat(row[q5K]);
-                if (!isNaN(q3V) || !isNaN(q4V) || !isNaN(q5V)) {
-                    const validVals = [q3V, q4V, q5V].filter(v => !isNaN(v));
-                    totalSpkScore += (validVals.reduce((a,b)=>a+b, 0) / validVals.length);
-                    spkCount++;
-                }
-
-                // Text Classification Loops
-                const progComment = row[progCommK];
-                if (progComment) {
-                    const sent = getSentiment(progComment);
-                    if (sent === 'positive') progPos.push(progComment);
-                    if (sent === 'negative') progNeg.push(progComment);
-                }
-
-                const spkComment = row[spkCommK];
-                if (spkComment) {
-                    const sent = getSentiment(spkComment);
-                    if (sent === 'positive') spkPos.push(spkComment);
-                    if (sent === 'negative') spkNeg.push(spkComment);
-                }
-            });
-
-            // Update UI Score views
-            const finalProgAvg = progCount > 0 ? (totalProgScore / progCount).toFixed(2) : "0.00";
-            const finalSpkAvg = spkCount > 0 ? (totalSpkScore / spkCount).toFixed(2) : "0.00";
-
-            document.getElementById('progScoreDisplay').textContent = `${finalProgAvg} / 5.00`;
-            document.getElementById('spkScoreDisplay').textContent = `${finalSpkAvg} / 5.00`;
-
-            // Populate Comment HTML Container items
-            updateListDisplay('progPosList', 'progPosCount', progPos);
-            updateListDisplay('progNegList', 'progNegCount', progNeg);
-            updateListDisplay('spkPosList', 'spkPosCount', spkPos);
-            updateListDisplay('spkNegList', 'spkNegCount', spkNeg);
-        });
-
-        function updateListDisplay(listId, countId, itemsArr) {
-            document.getElementById(countId).textContent = itemsArr.length;
-            const listEl = document.getElementById(listId);
-            listEl.innerHTML = '';
-            if (itemsArr.length === 0) {
-                listEl.innerHTML = `<li class="list-none text-gray-400 italic">No comments categorized in this bucket.</li>`;
-                return;
-            }
-            itemsArr.forEach(txt => {
-                const li = document.createElement('li');
-                li.textContent = txt;
-                listEl.appendChild(li);
-            });
-        }
-    </script>
-</body>
-</html>
