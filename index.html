@@ -11,7 +11,7 @@
     <header class="bg-blue-600 text-white py-6 shadow-md mb-8">
         <div class="container mx-auto px-4">
             <h1 class="text-3xl font-bold flex items-center gap-2">📊 Evaluation & Sentiment Analyzer</h1>
-            <p class="text-blue-100 mt-1 text-sm md:text-base">Time-window filtering enabled. Isolate specific morning, afternoon, or hourly sessions instantly (Out of 6.00).</p>
+            <p class="text-blue-100 mt-1 text-sm md:text-base">Zero-Configuration Engine. Hardcoded mapping for your specific evaluation forms (Out of 6.00).</p>
         </div>
     </header>
 
@@ -19,7 +19,7 @@
         
         <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 1. Paste Your Google Sheets Data</h2>
-            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet (Ctrl+A), copy (Ctrl+C), and paste below. The system cleans everything up automatically.</p>
+            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The system will align columns and isolate your session windows cleanly.</p>
             <textarea id="pasteArea" class="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste GSheets rows here..."></textarea>
             
             <div id="errorAlert" class="hidden mt-3 p-3 bg-red-100 border border-red-300 text-red-700 rounded text-sm"></div>
@@ -30,72 +30,23 @@
         <div id="dashboard" class="hidden">
             
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-                <h2 class="text-lg font-semibold mb-1 text-blue-600">🔍 2. Column Mapping & Session Windows</h2>
+                <h2 class="text-lg font-semibold mb-1 text-blue-600">⏱️ 2. Isolate Present Session Window</h2>
                 <p id="rowCountLabel" class="text-gray-500 text-xs mb-4 font-medium text-green-600">Processing records...</p>
                 
-                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                    <h3 class="text-xs font-bold text-blue-900 uppercase tracking-wide mb-3">⏱️ Isolate Present Session Window</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-blue-800 mb-1">Select Date</label>
-                            <select id="active_session_filter" class="w-full p-2 bg-white border border-gray-300 rounded text-sm font-bold text-blue-700 focus:ring-2 focus:ring-blue-500"></select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-blue-800 mb-1">Start Time</label>
-                            <input type="time" id="startTimeFilter" value="00:00" class="w-full p-1.5 bg-white border border-gray-300 rounded text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-blue-800 mb-1">End Time</label>
-                            <input type="time" id="endTimeFilter" value="23:59" class="w-full p-1.5 bg-white border border-gray-300 rounded text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500">
-                        </div>
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-md grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-blue-800 mb-1">Select Session Date</label>
+                        <select id="active_session_filter" class="w-full p-2 bg-white border border-gray-300 rounded text-sm font-bold text-blue-700 focus:ring-2 focus:ring-blue-500"></select>
                     </div>
-                    <div class="mt-2 hidden">
-                        <select id="session_col_map"></select>
+                    <div>
+                        <label class="block text-xs font-medium text-blue-800 mb-1">Start Time Boundary</label>
+                        <input type="time" id="startTimeFilter" value="00:00" class="w-full p-1.5 bg-white border border-gray-300 rounded text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-blue-800 mb-1">End Time Boundary</label>
+                        <input type="time" id="endTimeFilter" value="23:59" class="w-full p-1.5 bg-white border border-gray-300 rounded text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 p-4 rounded-md border border-gray-100">
-                        <h3 class="font-bold text-gray-700 mb-3 border-b pb-1">🏫 Program Evaluation Setup</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q1: The program was able to achieve its objectives.</label>
-                                <select id="q1_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q2: The program facilitator was effective in managing the program.</label>
-                                <select id="q2_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Program Comments (Improvements)</label>
-                                <select id="prog_comm_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 p-4 rounded-md border border-gray-100">
-                        <h3 class="font-bold text-gray-700 mb-3 border-b pb-1">🎙️ Speaker Evaluation Setup</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q3: The subject matter was presented effectively.</label>
-                                <select id="q3_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q4: The speaker is/are knowledgeable of the subject matter.</label>
-                                <select id="q4_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Q5: Participation and questions was encouraged by the speaker.</label>
-                                <select id="q5_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Speaker Comments</label>
-                                <select id="spk_comm_map" class="map-select w-full p-2 bg-white border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button id="calculateBtn" class="mt-5 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer w-full md:w-auto">Apply Time Constraints</button>
             </section>
 
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -142,8 +93,8 @@
             </section>
 
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-                <h2 class="text-lg font-bold text-gray-700 mb-2">📋 Live Data Preview Table (Selected Window Only)</h2>
-                <p class="text-gray-500 text-xs mb-4">Showing rows corresponding strictly to your active date and time range constraints.</p>
+                <h2 class="text-lg font-bold text-gray-700 mb-2">📋 Live Data Preview Table (Active Window Only)</h2>
+                <p class="text-gray-500 text-xs mb-4">Showing filtered response records inside your specified active time parameters.</p>
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr id="tableHeaderRow" class="bg-gray-100 text-gray-700 border-b border-gray-200"></tr>
@@ -158,6 +109,18 @@
     <script>
         let parsedData = [];
         let headers = [];
+        
+        // Target structural column headers mapped statically inside code logic execution
+        let columnKeys = {
+            timestamp: "",
+            q1: "",
+            q2: "",
+            progComm: "",
+            q3: "",
+            q4: "",
+            q5: "",
+            spkComm: ""
+        };
 
         const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned', 'satisfied', 'interactive', 'enjoyed'];
         const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast', 'improvement', 'improve', 'dislike'];
@@ -175,10 +138,8 @@
             return 'neutral';
         }
 
-        // Deconstructs standard formats ("MM/DD/YYYY HH:MM:SS AM/PM") into separated date and 24h structural times
         function parseTimestamp(timestampStr) {
             if (!timestampStr) return { date: "", time24: "00:00" };
-            
             let parts = timestampStr.trim().split(/\s+/);
             let datePart = parts[0] || ""; 
             let timePart = parts[1] || "00:00:00";
@@ -188,17 +149,13 @@
             let hours = parseInt(timeSubParts[0] || 0);
             let minutes = parseInt(timeSubParts[1] || 0);
             
-            // Normalize standard 12-hour AM/PM formats into a unified 24-hour evaluation timeline string
             if (ampm.toLowerCase() === 'pm' && hours < 12) hours += 12;
             if (ampm.toLowerCase() === 'am' && hours === 12) hours = 0;
             
             let hh = hours.toString().padStart(2, '0');
             let mm = minutes.toString().padStart(2, '0');
             
-            return {
-                date: datePart,
-                time24: `${hh}:${mm}`
-            };
+            return { date: datePart, time24: `${hh}:${mm}` };
         }
 
         function robustTSVParser(text) {
@@ -251,14 +208,30 @@
 
             const rawMatrix = robustTSVParser(rawText);
             if (rawMatrix.length < 2) {
-                errorAlert.textContent = "Data structure issue. Ensure you've highlighted the top row headers along with your data lines.";
+                errorAlert.textContent = "Data structure issue. Ensure you've highlighted the top row headers along with data entries.";
                 errorAlert.classList.remove('hidden');
                 return;
             }
 
             headers = rawMatrix[0].map(h => h.trim());
-            parsedData = [];
+            
+            // Auto-align structural references cleanly using case-insensitive target keyword mapping checks
+            columnKeys.timestamp = headers.find(h => h.toLowerCase().includes("timestamp")) || headers[0];
+            columnKeys.q1 = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || "";
+            columnKeys.q2 = headers.find(h => h.toLowerCase().includes("managing the program")) || "";
+            columnKeys.progComm = headers.find(h => h.toLowerCase().includes("improve the program")) || "";
+            columnKeys.q3 = headers.find(h => h.toLowerCase().includes("presented effectively")) || "";
+            columnKeys.q4 = headers.find(h => h.toLowerCase().includes("knowledgeable of the subject")) || "";
+            columnKeys.q5 = headers.find(h => h.toLowerCase().includes("encouraged by the speaker")) || "";
+            columnKeys.spkComm = headers.find(h => h.toLowerCase().includes("suggestion for the speaker")) || "";
 
+            // Structural Validation Alert Warning
+            if (!columnKeys.q1 || !columnKeys.q3) {
+                errorAlert.textContent = "Warning: App could not find matching header texts. Verify columns mirror your setup criteria exactly.";
+                errorAlert.classList.remove('hidden');
+            }
+
+            parsedData = [];
             for (let i = 1; i < rawMatrix.length; i++) {
                 const cells = rawMatrix[i];
                 if (cells.length === 0 || cells.every(c => c === "")) continue; 
@@ -280,49 +253,22 @@
                 }
             }
 
-            const selectIds = ['q1_map', 'q2_map', 'prog_comm_map', 'q3_map', 'q4_map', 'q5_map', 'spk_comm_map', 'session_col_map'];
-            selectIds.forEach((id) => {
-                const select = document.getElementById(id);
-                select.innerHTML = '';
-                
-                headers.forEach((header) => {
-                    const opt = document.createElement('option');
-                    opt.value = header;
-                    opt.textContent = header;
-                    
-                    const hLower = header.toLowerCase();
-                    if (id === 'q1_map' && hLower.includes("achieve its objectives")) opt.selected = true;
-                    if (id === 'q2_map' && hLower.includes("managing the program")) opt.selected = true;
-                    if (id === 'prog_comm_map' && hLower.includes("improve the program")) opt.selected = true;
-                    if (id === 'q3_map' && hLower.includes("presented effectively")) opt.selected = true;
-                    if (id === 'q4_map' && hLower.includes("knowledgeable of the subject")) opt.selected = true;
-                    if (id === 'q5_map' && hLower.includes("encouraged by the speaker")) opt.selected = true;
-                    if (id === 'spk_comm_map' && hLower.includes("suggestion for the speaker")) opt.selected = true;
-                    if (id === 'session_col_map' && hLower.includes("timestamp")) opt.selected = true;
-                    
-                    select.appendChild(opt);
-                });
-            });
-
             updateSessionDropdownOptions();
-
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
         });
 
-        document.getElementById('session_col_map').addEventListener('change', updateSessionDropdownOptions);
-        document.getElementById('active_session_filter').addEventListener('change', () => document.getElementById('calculateBtn').click());
-        document.getElementById('startTimeFilter').addEventListener('change', () => document.getElementById('calculateBtn').click());
-        document.getElementById('endTimeFilter').addEventListener('change', () => document.getElementById('calculateBtn').click());
+        document.getElementById('active_session_filter').addEventListener('change', runCalculations);
+        document.getElementById('startTimeFilter').addEventListener('change', runCalculations);
+        document.getElementById('endTimeFilter').addEventListener('change', runCalculations);
 
         function updateSessionDropdownOptions() {
-            const sessionColKey = document.getElementById('session_col_map').value;
             const filterDropdown = document.getElementById('active_session_filter');
             filterDropdown.innerHTML = '';
 
             let uniqueDates = new Set();
             parsedData.forEach(row => {
-                let parsed = parseTimestamp(row[sessionColKey]);
+                let parsed = parseTimestamp(row[columnKeys.timestamp]);
                 if (parsed.date !== "") uniqueDates.add(parsed.date);
             });
 
@@ -347,22 +293,13 @@
                 filterDropdown.selectedIndex = filterDropdown.options.length - 1;
             }
 
-            document.getElementById('calculateBtn').click();
+            runCalculations();
         }
 
-        document.getElementById('calculateBtn').addEventListener('click', () => {
-            const sessionColKey = document.getElementById('session_col_map').value;
+        function runCalculations() {
             const selectedDateValue = document.getElementById('active_session_filter').value;
-            const startTimeVal = document.getElementById('startTimeFilter').value; // Returns "HH:MM"
-            const endTimeVal = document.getElementById('endTimeFilter').value;     // Returns "HH:MM"
-
-            const q1K = document.getElementById('q1_map').value;
-            const q2K = document.getElementById('q2_map').value;
-            const q3K = document.getElementById('q3_map').value;
-            const q4K = document.getElementById('q4_map').value;
-            const q5K = document.getElementById('q5_map').value;
-            const progCommK = document.getElementById('prog_comm_map').value;
-            const spkCommK = document.getElementById('spk_comm_map').value;
+            const startTimeVal = document.getElementById('startTimeFilter').value; 
+            const endTimeVal = document.getElementById('endTimeFilter').value;     
 
             let totalProgScore = 0, progCount = 0;
             let totalSpkScore = 0, spkCount = 0;
@@ -372,19 +309,16 @@
             let filteredRows = [];
 
             parsedData.forEach(row => {
-                let parsed = parseTimestamp(row[sessionColKey]);
+                let parsed = parseTimestamp(row[columnKeys.timestamp]);
                 
-                // 1. Validate Date Constraint
                 if (parsed.date !== selectedDateValue) return;
-                
-                // 2. Validate Time Window Range Constraint (Direct alphanumeric comparison work on standard 24-hr formats)
                 if (parsed.time24 < startTimeVal || parsed.time24 > endTimeVal) return;
 
                 filteredRows.push(row);
 
-                // Program Score Calculations
-                const q1V = parseFloat(row[q1K]);
-                const q2V = parseFloat(row[q2K]);
+                // Program Evaluation Metrics calculation
+                const q1V = parseFloat(row[columnKeys.q1]);
+                const q2V = parseFloat(row[columnKeys.q2]);
                 let rowProgVals = [];
                 if (!isNaN(q1V) && q1V >= 1 && q1V <= 6) rowProgVals.push(q1V);
                 if (!isNaN(q2V) && q2V >= 1 && q2V <= 6) rowProgVals.push(q2V);
@@ -394,10 +328,10 @@
                     progCount++;
                 }
 
-                // Speaker Score Calculations
-                const q3V = parseFloat(row[q3K]);
-                const q4V = parseFloat(row[q4K]);
-                const q5V = parseFloat(row[q5K]);
+                // Speaker Evaluation Metrics calculation
+                const q3V = parseFloat(row[columnKeys.q3]);
+                const q4V = parseFloat(row[columnKeys.q4]);
+                const q5V = parseFloat(row[columnKeys.q5]);
                 let rowSpkVals = [];
                 if (!isNaN(q3V) && q3V >= 1 && q3V <= 6) rowSpkVals.push(q3V);
                 if (!isNaN(q4V) && q4V >= 1 && q4V <= 6) rowSpkVals.push(q4V);
@@ -408,8 +342,8 @@
                     spkCount++;
                 }
 
-                // Text Comments Filter
-                const progComment = row[progCommK];
+                // Program Comment Filters
+                const progComment = row[columnKeys.progComm];
                 if (progComment && progComment.trim() !== "") {
                     const cleanC = progComment.trim();
                     const lowC = cleanC.toLowerCase();
@@ -420,7 +354,8 @@
                     }
                 }
 
-                const spkComment = row[spkCommK];
+                // Speaker Comment Filters
+                const spkComment = row[columnKeys.spkComm];
                 if (spkComment && spkComment.trim() !== "") {
                     const cleanC = spkComment.trim();
                     const lowC = cleanC.toLowerCase();
@@ -432,7 +367,6 @@
                 }
             });
 
-            // Update UI Score displays
             const finalProgAvg = progCount > 0 ? (totalProgScore / progCount).toFixed(2) : "0.00";
             const finalSpkAvg = spkCount > 0 ? (totalSpkScore / spkCount).toFixed(2) : "0.00";
 
@@ -447,7 +381,7 @@
             updateListDisplay('spkNegList', 'spkNegCount', spkNeg);
 
             renderPreviewTable(filteredRows);
-        });
+        }
 
         function updateListDisplay(listId, countId, itemsArr) {
             document.getElementById(countId).textContent = itemsArr.length;
