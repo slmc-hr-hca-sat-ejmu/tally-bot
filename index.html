@@ -6,12 +6,12 @@
     <title>GSheets Evaluation & Sentiment Analyzer</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen pb-12 transition-all duration-200">
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-12">
 
     <header class="bg-blue-600 text-white py-6 shadow-md mb-8">
         <div class="container mx-auto px-4">
-            <h1 class="text-3xl font-bold flex items-center gap-2">📊 Universal Evaluation & Sentiment Analyzer</h1>
-            <p class="text-blue-100 mt-1 text-sm md:text-base">Polymorphic Analytics Engine. Automatically adjusts to standard surveys or lets you map custom structures manually.</p>
+            <h1 class="text-3xl font-bold flex items-center gap-2">📊 Evaluation & Sentiment Analyzer</h1>
+            <p class="text-blue-100 mt-1 text-sm md:text-base">Zero-Configuration Engine. Hardcoded mapping for your specific evaluation forms (Out of 6.00).</p>
         </div>
     </header>
 
@@ -19,74 +19,19 @@
         
         <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 1. Paste Your Google Sheets Data</h2>
-            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The system automatically structures unknown surveys, identifies metric scales, and maps sentiments.</p>
+            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The system will align columns and isolate your session windows cleanly.</p>
             <textarea id="pasteArea" class="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste GSheets rows here..."></textarea>
             
             <div id="errorAlert" class="hidden mt-3 p-3 bg-red-100 border border-red-300 text-red-700 rounded text-sm"></div>
             
-            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer inline-flex items-center gap-2">
-                <span>Clean & Process Data</span>
-            </button>
+            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer">Clean & Process Data</button>
         </section>
 
         <div id="dashboard" class="hidden">
             
-            <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8 border-t-4 border-t-amber-500">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">🔧 2. Data Structure & Column Mapping</h2>
-                        <p class="text-gray-500 text-xs mt-0.5">Adjust selections if the automated engine misaligned your survey data categories.</p>
-                    </div>
-                    <span class="bg-amber-100 text-amber-800 text-2xs px-2.5 py-1 font-bold rounded-full uppercase tracking-wider">Dynamic Matrix Control</span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Timestamp / Date Key</label>
-                            <select id="map_timestamp" class="w-full p-2 bg-gray-50 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 font-medium"></select>
-                        </div>
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-md">
-                            <span class="block text-xs font-bold text-blue-700 uppercase tracking-wider mb-2">📊 Evaluation Block A (e.g., Program Metrics)</span>
-                            <label class="block text-2xs text-gray-400 mb-2 font-medium">Check all columns to average together for Block A scores:</label>
-                            <div id="map_prog_scores_container" class="space-y-1.5 max-h-36 overflow-y-auto p-1 bg-white border border-gray-200 rounded"></div>
-                            <div class="mt-3">
-                                <label class="block text-2xs font-bold text-gray-600 mb-1">Feedback Comments Column</label>
-                                <select id="map_prog_comments" class="w-full p-1.5 bg-white border border-gray-300 rounded text-2xs focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="invisible h-0 md:h-auto md:visible">
-                            <label class="block text-xs font-bold text-transparent select-none uppercase mb-1">Spacer</label>
-                            <div class="p-1"></div>
-                        </div>
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-md">
-                            <span class="block text-xs font-bold text-purple-700 uppercase tracking-wider mb-2">🎙️ Evaluation Block B (e.g., Speaker Metrics)</span>
-                            <label class="block text-2xs text-gray-400 mb-2 font-medium">Check all columns to average together for Block B scores:</label>
-                            <div id="map_spk_scores_container" class="space-y-1.5 max-h-36 overflow-y-auto p-1 bg-white border border-gray-200 rounded"></div>
-                            <div class="mt-3">
-                                <label class="block text-2xs font-bold text-gray-600 mb-1">Feedback Comments Column</label>
-                                <select id="map_spk_comments" class="w-full p-1.5 bg-white border border-gray-300 rounded text-2xs focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-2 border-b border-gray-100">
-                    <div>
-                        <h2 class="text-lg font-semibold text-blue-600">⏱️ 3. Isolate Present Session Window</h2>
-                        <p id="rowCountLabel" class="text-gray-500 text-xs font-medium text-green-600">Processing records...</p>
-                    </div>
-                    <div>
-                        <button id="refreshBtn" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md shadow transition-colors cursor-pointer text-xs flex items-center gap-2">
-                            <span>🔄 Refresh Analytics</span>
-                        </button>
-                    </div>
-                </div>
+                <h2 class="text-lg font-semibold mb-1 text-blue-600">⏱️ 2. Isolate Present Session Window</h2>
+                <p id="rowCountLabel" class="text-gray-500 text-xs mb-4 font-medium text-green-600">Processing records...</p>
                 
                 <div class="p-4 bg-blue-50 border border-blue-200 rounded-md grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -106,20 +51,20 @@
 
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-blue-500 border-gray-200 text-center">
-                    <span id="progCardTitle" class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Program Evaluation Average</span>
-                    <h3 id="progSubLabel" class="text-xs text-gray-400 mt-1 max-w-full truncate">(Average of Q1 & Q2)</h3>
+                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Program Evaluation Average</span>
+                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q1 & Q2)</h3>
                     <div id="progScoreDisplay" class="text-4xl font-extrabold text-blue-600 mt-2">0.00 / 6.00</div>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-purple-500 border-gray-200 text-center">
-                    <span id="spkCardTitle" class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Speaker Evaluation Average</span>
-                    <h3 id="spkSubLabel" class="text-xs text-gray-400 mt-1 max-w-full truncate">(Average of Q3, Q4, & Q5)</h3>
+                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Speaker Evaluation Average</span>
+                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q3, Q4, & Q5)</h3>
                     <div id="spkScoreDisplay" class="text-4xl font-extrabold text-purple-600 mt-2">0.00 / 6.00</div>
                 </div>
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 id="progCommentHeader" class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🏫 Program Feedback Breakdown</h2>
+                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🏫 Program Feedback Breakdown</h2>
                     <div class="grid grid-cols-1 gap-4">
                         <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
                             <h3 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Comments (<span id="progPosCount">0</span>)</h3>
@@ -133,7 +78,7 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 id="spkCommentHeader" class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🎙️ Speaker Feedback Breakdown</h2>
+                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🎙️ Speaker Feedback Breakdown</h2>
                     <div class="grid grid-cols-1 gap-4">
                         <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
                             <h3 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Comments (<span id="spkPosCount">0</span>)</h3>
@@ -164,37 +109,21 @@
     <script>
         let parsedData = [];
         let headers = [];
-        let maxScaleValue = 6.00; 
         
-        let activeProgNumericCols = [];
-        let activeSpkNumericCols = [];
-
+        // Target structural column headers mapped statically inside code logic execution
         let columnKeys = {
             timestamp: "",
+            q1: "",
+            q2: "",
             progComm: "",
+            q3: "",
+            q4: "",
+            q5: "",
             spkComm: ""
         };
 
         const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned', 'satisfied', 'interactive', 'enjoyed'];
         const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast', 'improvement', 'improve', 'dislike'];
-
-        function setGlobalLoadingState(isLoading) {
-            const body = document.body;
-            const processBtn = document.getElementById('processBtn');
-            const refreshBtn = document.getElementById('refreshBtn');
-
-            if (isLoading) {
-                body.classList.add('cursor-wait');
-                body.style.pointerEvents = 'none';
-                if (processBtn) processBtn.innerText = "⏳ Processing Data...";
-                if (refreshBtn) refreshBtn.innerText = "⏳ Syncing View...";
-            } else {
-                body.classList.remove('cursor-wait');
-                body.style.pointerEvents = 'auto';
-                if (processBtn) processBtn.innerText = "Clean & Process Data";
-                if (refreshBtn) refreshBtn.innerText = "🔄 Refresh Analytics";
-            }
-        }
 
         function getSentiment(text) {
             if (!text || text.trim() === "") return 'neutral';
@@ -267,23 +196,6 @@
         }
 
         document.getElementById('processBtn').addEventListener('click', () => {
-            setGlobalLoadingState(true);
-            setTimeout(() => {
-                runDataIngestionPipeline();
-                setGlobalLoadingState(false);
-            }, 80);
-        });
-
-        document.getElementById('refreshBtn').addEventListener('click', () => {
-            setGlobalLoadingState(true);
-            setTimeout(() => {
-                readMappingFormControls();
-                runCalculations();
-                setGlobalLoadingState(false);
-            }, 80);
-        });
-
-        function runDataIngestionPipeline() {
             const errorAlert = document.getElementById('errorAlert');
             errorAlert.classList.add('hidden');
 
@@ -303,58 +215,22 @@
 
             headers = rawMatrix[0].map(h => h.trim());
             
-            // 1. Initial heuristic check matching targets
+            // Auto-align structural references cleanly using case-insensitive target keyword mapping checks
             columnKeys.timestamp = headers.find(h => h.toLowerCase().includes("timestamp")) || headers[0];
-            let stdQ1 = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || "";
-            let stdQ2 = headers.find(h => h.toLowerCase().includes("managing the program")) || "";
-            let stdProgComm = headers.find(h => h.toLowerCase().includes("improve the program")) || "";
-            let stdQ3 = headers.find(h => h.toLowerCase().includes("presented effectively")) || "";
-            let stdQ4 = headers.find(h => h.toLowerCase().includes("knowledgeable of the subject")) || "";
-            let stdQ5 = headers.find(h => h.toLowerCase().includes("encouraged by the speaker")) || "";
-            let stdSpkComm = headers.find(h => h.toLowerCase().includes("suggestion for the speaker")) || "";
+            columnKeys.q1 = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || "";
+            columnKeys.q2 = headers.find(h => h.toLowerCase().includes("managing the program")) || "";
+            columnKeys.progComm = headers.find(h => h.toLowerCase().includes("improve the program")) || "";
+            columnKeys.q3 = headers.find(h => h.toLowerCase().includes("presented effectively")) || "";
+            columnKeys.q4 = headers.find(h => h.toLowerCase().includes("knowledgeable of the subject")) || "";
+            columnKeys.q5 = headers.find(h => h.toLowerCase().includes("encouraged by the speaker")) || "";
+            columnKeys.spkComm = headers.find(h => h.toLowerCase().includes("suggestion for the speaker")) || "";
 
-            let standardMatched = stdQ1 || stdQ3;
-
-            if (standardMatched) {
-                activeProgNumericCols = [stdQ1, stdQ2].filter(Boolean);
-                activeSpkNumericCols = [stdQ3, stdQ4, stdQ5].filter(Boolean);
-                columnKeys.progComm = stdProgComm;
-                columnKeys.spkComm = stdSpkComm;
-            } else {
-                // Heuristic parsing of completely custom/random sheets
-                let dynamicNumericFields = [];
-                let dynamicTextFields = [];
-
-                headers.forEach((hdr) => {
-                    if (hdr === columnKeys.timestamp) return;
-                    let idx = headers.indexOf(hdr);
-                    let numberTokens = 0, textTokens = 0, rowsSampled = 0;
-
-                    for (let r = 1; r < Math.min(rawMatrix.length, 12); r++) {
-                        if (rawMatrix[r] && rawMatrix[r][idx] !== undefined) {
-                            let cellVal = rawMatrix[r][idx].trim();
-                            if (cellVal === "") continue;
-                            rowsSampled++;
-                            if (!isNaN(parseFloat(cellVal))) numberTokens++;
-                            else if (cellVal.length > 2) textTokens++;
-                        }
-                    }
-                    if (numberTokens >= textTokens && rowsSampled > 0) dynamicNumericFields.push(hdr);
-                    else if (rowsSampled > 0) dynamicTextFields.push(hdr);
-                });
-
-                let midpoint = Math.ceil(dynamicNumericFields.length / 2);
-                activeProgNumericCols = dynamicNumericFields.slice(0, midpoint);
-                activeSpkNumericCols = dynamicNumericFields.slice(midpoint);
-
-                columnKeys.progComm = dynamicTextFields[0] || "";
-                columnKeys.spkComm = dynamicTextFields[1] || "";
+            // Structural Validation Alert Warning
+            if (!columnKeys.q1 || !columnKeys.q3) {
+                errorAlert.textContent = "Warning: App could not find matching header texts. Verify columns mirror your setup criteria exactly.";
+                errorAlert.classList.remove('hidden');
             }
 
-            // Populate the Dynamic Form Configuration Element Matrix mapping sections completely
-            renderMappingConfigurationUIPanel();
-
-            // Store cleanly processed rows array records securely
             parsedData = [];
             for (let i = 1; i < rawMatrix.length; i++) {
                 const cells = rawMatrix[i];
@@ -380,106 +256,11 @@
             updateSessionDropdownOptions();
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
-        }
+        });
 
-        function renderMappingConfigurationUIPanel() {
-            const tsSelect = document.getElementById('map_timestamp');
-            const progCommSelect = document.getElementById('map_prog_comments');
-            const spkCommSelect = document.getElementById('map_spk_comments');
-            const progCheckContainer = document.getElementById('map_prog_scores_container');
-            const spkCheckContainer = document.getElementById('map_spk_scores_container');
-
-            // Reset components
-            tsSelect.innerHTML = '';
-            progCommSelect.innerHTML = '<option value="">-- None / Skip --</option>';
-            spkCommSelect.innerHTML = '<option value="">-- None / Skip --</option>';
-            progCheckContainer.innerHTML = '';
-            spkCheckContainer.innerHTML = '';
-
-            headers.forEach(h => {
-                // Populate base options dropdown options arrays cleanly
-                let optTS = new Option(h, h, h === columnKeys.timestamp, h === columnKeys.timestamp);
-                tsSelect.add(optTS);
-
-                let optPC = new Option(h, h, h === columnKeys.progComm, h === columnKeys.progComm);
-                progCommSelect.add(optPC);
-
-                let optSC = new Option(h, h, h === columnKeys.spkComm, h === columnKeys.spkComm);
-                spkCommSelect.add(optSC);
-
-                // Add Checkbox Elements for Block A Score matrix combinations mapping controls
-                let divA = document.createElement('div');
-                divA.className = "flex items-center gap-2 px-1.5 py-0.5 hover:bg-slate-100 rounded text-2xs transition-colors";
-                let isCheckedA = activeProgNumericCols.includes(h);
-                divA.innerHTML = `<input type="checkbox" id="chkA_${btoa(h)}" value="${h}" ${isCheckedA ? 'checked' : ''} class="prog-score-chk accent-blue-600 cursor-pointer">
-                                  <label for="chkA_${btoa(h)}" class="text-gray-700 font-medium truncate select-none cursor-pointer flex-1" title="${h}">${h}</label>`;
-                progCheckContainer.appendChild(divA);
-
-                // Add Checkbox Elements for Block B Score matrix combinations mapping controls
-                let divB = document.createElement('div');
-                divB.className = "flex items-center gap-2 px-1.5 py-0.5 hover:bg-slate-100 rounded text-2xs transition-colors";
-                let isCheckedB = activeSpkNumericCols.includes(h);
-                divB.innerHTML = `<input type="checkbox" id="chkB_${btoa(h)}" value="${h}" ${isCheckedB ? 'checked' : ''} class="spk-score-chk accent-purple-600 cursor-pointer">
-                                  <label for="chkB_${btoa(h)}" class="text-gray-700 font-medium truncate select-none cursor-pointer flex-1" title="${h}">${h}</label>`;
-                spkCheckContainer.appendChild(divB);
-            });
-
-            // Set dynamic event listeners to update visual dashboard properties automatically on change updates
-            const autoTriggerTriggers = [tsSelect, progCommSelect, spkCommSelect];
-            autoTriggerTriggers.forEach(el => el.addEventListener('change', () => {
-                readMappingFormControls();
-                runCalculations();
-            }));
-
-            // Handle functional change monitoring blocks on checkboxes explicitly
-            document.querySelectorAll('.prog-score-chk, .spk-score-chk').forEach(input => {
-                input.addEventListener('change', () => {
-                    readMappingFormControls();
-                    runCalculations();
-                });
-            });
-        }
-
-        function readMappingFormControls() {
-            columnKeys.timestamp = document.getElementById('map_timestamp').value;
-            columnKeys.progComm = document.getElementById('map_prog_comments').value;
-            columnKeys.spkComm = document.getElementById('map_spk_comments').value;
-
-            // Recapture active dynamic metrics fields matrices choices safely array streams
-            activeProgNumericCols = [];
-            document.querySelectorAll('.prog-score-chk:checked').forEach(cb => {
-                activeProgNumericCols.push(cb.value);
-            });
-
-            activeSpkNumericCols = [];
-            document.querySelectorAll('.spk-score-chk:checked').forEach(cb => {
-                activeSpkNumericCols.push(cb.value);
-            });
-        }
-
-        function recalculateMetricsMaximumScaleContext() {
-            let combinedMetricCols = [...activeProgNumericCols, ...activeSpkNumericCols];
-            let rawMaxDetected = 0;
-
-            parsedData.forEach(row => {
-                combinedMetricCols.forEach(col => {
-                    if (row[col]) {
-                        let parsedVal = parseFloat(row[col]);
-                        if (!isNaN(parsedVal) && parsedVal > rawMaxDetected) {
-                            rawMaxDetected = parsedVal;
-                        }
-                    }
-                });
-            });
-
-            // Dynamically evaluate highest standard rounding scales limits profiles arrays contexts
-            if (rawMaxDetected === 0) maxScaleValue = 6.00;
-            else if (rawMaxDetected <= 5.00) maxScaleValue = 5.00;
-            else if (rawMaxDetected <= 6.00) maxScaleValue = 6.00;
-            else if (rawMaxDetected <= 10.00) maxScaleValue = 10.00;
-            else if (rawMaxDetected <= 100.00) maxScaleValue = 100.00;
-            else maxScaleValue = Math.ceil(rawMaxDetected);
-        }
+        document.getElementById('active_session_filter').addEventListener('change', runCalculations);
+        document.getElementById('startTimeFilter').addEventListener('change', runCalculations);
+        document.getElementById('endTimeFilter').addEventListener('change', runCalculations);
 
         function updateSessionDropdownOptions() {
             const filterDropdown = document.getElementById('active_session_filter');
@@ -512,37 +293,10 @@
                 filterDropdown.selectedIndex = filterDropdown.options.length - 1;
             }
 
-            // Run initial baseline processing
-            readMappingFormControls();
             runCalculations();
         }
 
         function runCalculations() {
-            // Update custom max value scale thresholds before final formatting displays update
-            recalculateMetricsMaximumScaleContext();
-
-            // Perform descriptive contextual checks to name modules elegantly based on mapping properties choices
-            let isStandardForm = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || false;
-            if (isStandardForm) {
-                document.getElementById('progCardTitle').textContent = "Program Evaluation Average";
-                document.getElementById('spkCardTitle').textContent = "Speaker Evaluation Average";
-                document.getElementById('progCommentHeader').textContent = "🏫 Program Feedback Breakdown";
-                document.getElementById('spkCommentHeader').textContent = "🎙️ Speaker Feedback Breakdown";
-            } else {
-                document.getElementById('progCardTitle').textContent = "Evaluation Blocks (Group A)";
-                document.getElementById('spkCardTitle').textContent = "Evaluation Blocks (Group B)";
-                document.getElementById('progCommentHeader').textContent = "📋 Mapped Comments (Group A)";
-                document.getElementById('spkCommentHeader').textContent = "📋 Mapped Comments (Group B)";
-            }
-
-            // Adjust descriptive short subtitles descriptions labels
-            document.getElementById('progSubLabel').textContent = activeProgNumericCols.length > 0 
-                ? `(Avg of: ${activeProgNumericCols.map(c => c.length > 18 ? c.substring(0, 15) + '...' : c).join(', ')})` 
-                : '(No validation fields checked)';
-            document.getElementById('spkSubLabel').textContent = activeSpkNumericCols.length > 0 
-                ? `(Avg of: ${activeSpkNumericCols.map(c => c.length > 18 ? c.substring(0, 15) + '...' : c).join(', ')})` 
-                : '(No validation fields checked)';
-
             const selectedDateValue = document.getElementById('active_session_filter').value;
             const startTimeVal = document.getElementById('startTimeFilter').value; 
             const endTimeVal = document.getElementById('endTimeFilter').value;     
@@ -562,52 +316,53 @@
 
                 filteredRows.push(row);
 
-                // Block A computation loop
-                let validRowProgVals = [];
-                activeProgNumericCols.forEach(colKey => {
-                    let val = parseFloat(row[colKey]);
-                    if (!isNaN(val) && val >= 0) validRowProgVals.push(val);
-                });
-                if (validRowProgVals.length > 0) {
-                    totalProgScore += (validRowProgVals.reduce((a, b) => a + b, 0) / validRowProgVals.length);
+                // Program Evaluation Metrics calculation
+                const q1V = parseFloat(row[columnKeys.q1]);
+                const q2V = parseFloat(row[columnKeys.q2]);
+                let rowProgVals = [];
+                if (!isNaN(q1V) && q1V >= 1 && q1V <= 6) rowProgVals.push(q1V);
+                if (!isNaN(q2V) && q2V >= 1 && q2V <= 6) rowProgVals.push(q2V);
+
+                if (rowProgVals.length > 0) {
+                    totalProgScore += (rowProgVals.reduce((a, b) => a + b, 0) / rowProgVals.length);
                     progCount++;
                 }
 
-                // Block B computation loop
-                let validRowSpkVals = [];
-                activeSpkNumericCols.forEach(colKey => {
-                    let val = parseFloat(row[colKey]);
-                    if (!isNaN(val) && val >= 0) validRowSpkVals.push(val);
-                });
-                if (validRowSpkVals.length > 0) {
-                    totalSpkScore += (validRowSpkVals.reduce((a, b) => a + b, 0) / validRowSpkVals.length);
+                // Speaker Evaluation Metrics calculation
+                const q3V = parseFloat(row[columnKeys.q3]);
+                const q4V = parseFloat(row[columnKeys.q4]);
+                const q5V = parseFloat(row[columnKeys.q5]);
+                let rowSpkVals = [];
+                if (!isNaN(q3V) && q3V >= 1 && q3V <= 6) rowSpkVals.push(q3V);
+                if (!isNaN(q4V) && q4V >= 1 && q4V <= 6) rowSpkVals.push(q4V);
+                if (!isNaN(q5V) && q5V >= 1 && q5V <= 6) rowSpkVals.push(q5V);
+
+                if (rowSpkVals.length > 0) {
+                    totalSpkScore += (rowSpkVals.reduce((a, b) => a + b, 0) / rowSpkVals.length);
                     spkCount++;
                 }
 
-                // Processing Sentiment Arrays fields sections
-                if (columnKeys.progComm) {
-                    const progComment = row[columnKeys.progComm];
-                    if (progComment && progComment.trim() !== "") {
-                        const cleanC = progComment.trim();
-                        const lowC = cleanC.toLowerCase();
-                        if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
-                            const sent = getSentiment(cleanC);
-                            if (sent === 'positive') progPos.push(cleanC);
-                            if (sent === 'negative') progNeg.push(cleanC);
-                        }
+                // Program Comment Filters
+                const progComment = row[columnKeys.progComm];
+                if (progComment && progComment.trim() !== "") {
+                    const cleanC = progComment.trim();
+                    const lowC = cleanC.toLowerCase();
+                    if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
+                        const sent = getSentiment(cleanC);
+                        if (sent === 'positive') progPos.push(cleanC);
+                        if (sent === 'negative') progNeg.push(cleanC);
                     }
                 }
 
-                if (columnKeys.spkComm) {
-                    const spkComment = row[columnKeys.spkComm];
-                    if (spkComment && spkComment.trim() !== "") {
-                        const cleanC = spkComment.trim();
-                        const lowC = cleanC.toLowerCase();
-                        if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
-                            const sent = getSentiment(cleanC);
-                            if (sent === 'positive') spkPos.push(cleanC);
-                            if (sent === 'negative') spkNeg.push(cleanC);
-                        }
+                // Speaker Comment Filters
+                const spkComment = row[columnKeys.spkComm];
+                if (spkComment && spkComment.trim() !== "") {
+                    const cleanC = spkComment.trim();
+                    const lowC = cleanC.toLowerCase();
+                    if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
+                        const sent = getSentiment(cleanC);
+                        if (sent === 'positive') spkPos.push(cleanC);
+                        if (sent === 'negative') spkNeg.push(cleanC);
                     }
                 }
             });
@@ -615,8 +370,8 @@
             const finalProgAvg = progCount > 0 ? (totalProgScore / progCount).toFixed(2) : "0.00";
             const finalSpkAvg = spkCount > 0 ? (totalSpkScore / spkCount).toFixed(2) : "0.00";
 
-            document.getElementById('progScoreDisplay').textContent = `${finalProgAvg} / ${maxScaleValue.toFixed(2)}`;
-            document.getElementById('spkScoreDisplay').textContent = `${finalSpkAvg} / ${maxScaleValue.toFixed(2)}`;
+            document.getElementById('progScoreDisplay').textContent = `${finalProgAvg} / 6.00`;
+            document.getElementById('spkScoreDisplay').textContent = `${finalSpkAvg} / 6.00`;
 
             document.getElementById('rowCountLabel').textContent = `Showing analytics for selected window: ${selectedDateValue} between ${startTimeVal} and ${endTimeVal} (${filteredRows.length} rows inside bracket).`;
 
@@ -633,7 +388,7 @@
             const listEl = document.getElementById(listId);
             listEl.innerHTML = '';
             if (itemsArr.length === 0) {
-                listEl.innerHTML = `<li class="list-none text-gray-400 italic">No comments matching mapped data parameters found within this time bracket.</li>`;
+                listEl.innerHTML = `<li class="list-none text-gray-400 italic">No comments matching this criteria found for this specific time bracket.</li>`;
                 return;
             }
             itemsArr.forEach(txt => {
@@ -669,11 +424,6 @@
                 bodyData.appendChild(tr);
             });
         }
-
-        // Dropdowns input change elements configurations monitors 
-        document.getElementById('active_session_filter').addEventListener('change', runCalculations);
-        document.getElementById('startTimeFilter').addEventListener('change', runCalculations);
-        document.getElementById('endTimeFilter').addEventListener('change', runCalculations);
     </script>
 </body>
 </html>
