@@ -6,12 +6,12 @@
     <title>GSheets Evaluation & Sentiment Analyzer</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen pb-12">
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-12 transition-all duration-200">
 
     <header class="bg-blue-600 text-white py-6 shadow-md mb-8">
         <div class="container mx-auto px-4">
             <h1 class="text-3xl font-bold flex items-center gap-2">📊 Evaluation & Sentiment Analyzer</h1>
-            <p class="text-blue-100 mt-1 text-sm md:text-base">Zero-Configuration Engine. Hardcoded mapping for your specific evaluation forms (Out of 6.00).</p>
+            <p class="text-blue-100 mt-1 text-sm md:text-base">Zero-Configuration Engine. Adaptive fallback mapping for flexible sheet structures.</p>
         </div>
     </header>
 
@@ -19,19 +19,30 @@
         
         <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 1. Paste Your Google Sheets Data</h2>
-            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The system will align columns and isolate your session windows cleanly.</p>
+            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The engine will map headers automatically.</p>
             <textarea id="pasteArea" class="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste GSheets rows here..."></textarea>
             
             <div id="errorAlert" class="hidden mt-3 p-3 bg-red-100 border border-red-300 text-red-700 rounded text-sm"></div>
             
-            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer">Clean & Process Data</button>
+            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer inline-flex items-center gap-2 disabled:opacity-50">
+                Clean & Process Data
+            </button>
         </section>
 
         <div id="dashboard" class="hidden">
             
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-                <h2 class="text-lg font-semibold mb-1 text-blue-600">⏱️ 2. Isolate Present Session Window</h2>
-                <p id="rowCountLabel" class="text-gray-500 text-xs mb-4 font-medium text-green-600">Processing records...</p>
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 border-b pb-2">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-600">⏱️ 2. Isolate Present Session Window</h2>
+                        <p id="rowCountLabel" class="text-gray-500 text-xs font-medium text-green-600">Processing records...</p>
+                    </div>
+                    <div class="mt-2 md:mt-0">
+                        <button id="refreshBtn" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-1.5 px-4 rounded-md shadow transition-colors text-xs flex items-center gap-2 cursor-pointer disabled:opacity-50">
+                            🔄 Refresh Analytics
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="p-4 bg-blue-50 border border-blue-200 rounded-md grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -51,20 +62,20 @@
 
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-blue-500 border-gray-200 text-center">
-                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Program Evaluation Average</span>
-                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q1 & Q2)</h3>
+                    <span id="progCardTitle" class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Program Evaluation Average</span>
+                    <h3 id="progSubLabel" class="text-xs text-gray-400 mt-1 max-w-full truncate">(Average of Q1 & Q2)</h3>
                     <div id="progScoreDisplay" class="text-4xl font-extrabold text-blue-600 mt-2">0.00 / 6.00</div>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-purple-500 border-gray-200 text-center">
-                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Speaker Evaluation Average</span>
-                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q3, Q4, & Q5)</h3>
+                    <span id="spkCardTitle" class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Speaker Evaluation Average</span>
+                    <h3 id="spkSubLabel" class="text-xs text-gray-400 mt-1 max-w-full truncate">(Average of Q3, Q4, & Q5)</h3>
                     <div id="spkScoreDisplay" class="text-4xl font-extrabold text-purple-600 mt-2">0.00 / 6.00</div>
                 </div>
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🏫 Program Feedback Breakdown</h2>
+                    <h2 id="progCommentHeader" class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🏫 Program Feedback Breakdown</h2>
                     <div class="grid grid-cols-1 gap-4">
                         <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
                             <h3 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Comments (<span id="progPosCount">0</span>)</h3>
@@ -78,7 +89,7 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🎙️ Speaker Feedback Breakdown</h2>
+                    <h2 id="spkCommentHeader" class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🎙️ Speaker Feedback Breakdown</h2>
                     <div class="grid grid-cols-1 gap-4">
                         <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
                             <h3 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Comments (<span id="spkPosCount">0</span>)</h3>
@@ -110,20 +121,28 @@
         let parsedData = [];
         let headers = [];
         
-        // Target structural column headers mapped statically inside code logic execution
         let columnKeys = {
-            timestamp: "",
-            q1: "",
-            q2: "",
-            progComm: "",
-            q3: "",
-            q4: "",
-            q5: "",
-            spkComm: ""
+            timestamp: "", q1: "", q2: "", progComm: "", q3: "", q4: "", q5: "", spkComm: ""
         };
 
         const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned', 'satisfied', 'interactive', 'enjoyed'];
         const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast', 'improvement', 'improve', 'dislike'];
+
+        function toggleLoadingState(isLoading) {
+            const body = document.body;
+            const pBtn = document.getElementById('processBtn');
+            const rBtn = document.getElementById('refreshBtn');
+            
+            if (isLoading) {
+                body.classList.add('cursor-wait', 'pointer-events-none');
+                if(pBtn) { pBtn.disabled = true; pBtn.innerText = "Processing Data..."; }
+                if(rBtn) { rBtn.disabled = true; rBtn.innerText = "🔄 Syncing..."; }
+            } else {
+                body.classList.remove('cursor-wait', 'pointer-events-none');
+                if(pBtn) { pBtn.disabled = false; pBtn.innerText = "Clean & Process Data"; }
+                if(rBtn) { rBtn.disabled = false; rBtn.innerText = "🔄 Refresh Analytics"; }
+            }
+        }
 
         function getSentiment(text) {
             if (!text || text.trim() === "") return 'neutral';
@@ -196,6 +215,23 @@
         }
 
         document.getElementById('processBtn').addEventListener('click', () => {
+            toggleLoadingState(true);
+            
+            setTimeout(() => {
+                executeProcessingPipeline();
+                toggleLoadingState(false);
+            }, 100);
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            toggleLoadingState(true);
+            setTimeout(() => {
+                runCalculations();
+                toggleLoadingState(false);
+            }, 100);
+        });
+
+        function executeProcessingPipeline() {
             const errorAlert = document.getElementById('errorAlert');
             errorAlert.classList.add('hidden');
 
@@ -215,7 +251,7 @@
 
             headers = rawMatrix[0].map(h => h.trim());
             
-            // Auto-align structural references cleanly using case-insensitive target keyword mapping checks
+            // 1. Check Primary Strict Matches
             columnKeys.timestamp = headers.find(h => h.toLowerCase().includes("timestamp")) || headers[0];
             columnKeys.q1 = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || "";
             columnKeys.q2 = headers.find(h => h.toLowerCase().includes("managing the program")) || "";
@@ -225,11 +261,59 @@
             columnKeys.q5 = headers.find(h => h.toLowerCase().includes("encouraged by the speaker")) || "";
             columnKeys.spkComm = headers.find(h => h.toLowerCase().includes("suggestion for the speaker")) || "";
 
-            // Structural Validation Alert Warning
-            if (!columnKeys.q1 || !columnKeys.q3) {
-                errorAlert.textContent = "Warning: App could not find matching header texts. Verify columns mirror your setup criteria exactly.";
-                errorAlert.classList.remove('hidden');
+            // 2. Intelligent Adaptive Fallback Logic
+            let allocatedHeaders = Object.values(columnKeys);
+            let unallocatedHeaders = headers.filter(h => h !== columnKeys.timestamp && !allocatedHeaders.includes(h));
+
+            let detectedNumeric = [];
+            let detectedText = [];
+
+            unallocatedHeaders.forEach(h => {
+                let colIndex = headers.indexOf(h);
+                let numericHits = 0, textHits = 0, sampledRows = 0;
+
+                for (let r = 1; r < Math.min(rawMatrix.length, 6); r++) {
+                    if (rawMatrix[r] && rawMatrix[r][colIndex] !== undefined) {
+                        let innerVal = rawMatrix[r][colIndex].trim();
+                        if (innerVal === "") continue;
+                        sampledRows++;
+                        if (!isNaN(parseFloat(innerVal))) numericHits++;
+                        else if (innerVal.length > 2) textHits++;
+                    }
+                }
+                if (numericHits >= textHits && sampledRows > 0) detectedNumeric.push(h);
+                else if (sampledRows > 0) detectedText.push(h);
+            });
+
+            // Map dynamically found components safely into structural variables if original locations are blank
+            let structuralFallbackUsed = false;
+            if (!columnKeys.q1 && detectedNumeric.length > 0) { columnKeys.q1 = detectedNumeric.shift(); structuralFallbackUsed = true; }
+            if (!columnKeys.q2 && detectedNumeric.length > 0) { columnKeys.q2 = detectedNumeric.shift(); structuralFallbackUsed = true; }
+            if (!columnKeys.q3 && detectedNumeric.length > 0) { columnKeys.q3 = detectedNumeric.shift(); structuralFallbackUsed = true; }
+            if (!columnKeys.q4 && detectedNumeric.length > 0) { columnKeys.q4 = detectedNumeric.shift(); structuralFallbackUsed = true; }
+            if (!columnKeys.q5 && detectedNumeric.length > 0) { columnKeys.q5 = detectedNumeric.shift(); structuralFallbackUsed = true; }
+
+            if (!columnKeys.progComm && detectedText.length > 0) columnKeys.progComm = detectedText.shift();
+            if (!columnKeys.spkComm && detectedText.length > 0) columnKeys.spkComm = detectedText.shift();
+
+            // 3. Dynamically adjust UI configuration naming schemes
+            if (structuralFallbackUsed) {
+                document.getElementById('progCardTitle').textContent = "Evaluation Metric Block A";
+                document.getElementById('spkCardTitle').textContent = "Evaluation Metric Block B";
+                document.getElementById('progCommentHeader').textContent = "📋 Mapped Feedback Group A";
+                document.getElementById('spkCommentHeader').textContent = "📋 Mapped Feedback Group B";
+            } else {
+                document.getElementById('progCardTitle').textContent = "Program Evaluation Average";
+                document.getElementById('spkCardTitle').textContent = "Speaker Evaluation Average";
+                document.getElementById('progCommentHeader').textContent = "🏫 Program Feedback Breakdown";
+                document.getElementById('spkCommentHeader').textContent = "🎙️ Speaker Feedback Breakdown";
             }
+
+            // Clean up titles truncated nicely for sub label clarity updates
+            let subA = [columnKeys.q1, columnKeys.q2].filter(Boolean).map(x => x.length > 20 ? x.substring(0,20)+'...' : x);
+            let subB = [columnKeys.q3, columnKeys.q4, columnKeys.q5].filter(Boolean).map(x => x.length > 20 ? x.substring(0,20)+'...' : x);
+            document.getElementById('progSubLabel').textContent = subA.length > 0 ? `(Avg: ${subA.join(', ')})` : '(No numeric metrics mapped)';
+            document.getElementById('spkSubLabel').textContent = subB.length > 0 ? `(Avg: ${subB.join(', ')})` : '(No numeric metrics mapped)';
 
             parsedData = [];
             for (let i = 1; i < rawMatrix.length; i++) {
@@ -256,7 +340,7 @@
             updateSessionDropdownOptions();
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
-        });
+        }
 
         document.getElementById('active_session_filter').addEventListener('change', runCalculations);
         document.getElementById('startTimeFilter').addEventListener('change', runCalculations);
@@ -316,53 +400,51 @@
 
                 filteredRows.push(row);
 
-                // Program Evaluation Metrics calculation
-                const q1V = parseFloat(row[columnKeys.q1]);
-                const q2V = parseFloat(row[columnKeys.q2]);
+                // Cluster A Metrics calculation logic validation check
                 let rowProgVals = [];
-                if (!isNaN(q1V) && q1V >= 1 && q1V <= 6) rowProgVals.push(q1V);
-                if (!isNaN(q2V) && q2V >= 1 && q2V <= 6) rowProgVals.push(q2V);
+                if (columnKeys.q1) { let v = parseFloat(row[columnKeys.q1]); if (!isNaN(v)) rowProgVals.push(v); }
+                if (columnKeys.q2) { let v = parseFloat(row[columnKeys.q2]); if (!isNaN(v)) rowProgVals.push(v); }
 
                 if (rowProgVals.length > 0) {
                     totalProgScore += (rowProgVals.reduce((a, b) => a + b, 0) / rowProgVals.length);
                     progCount++;
                 }
 
-                // Speaker Evaluation Metrics calculation
-                const q3V = parseFloat(row[columnKeys.q3]);
-                const q4V = parseFloat(row[columnKeys.q4]);
-                const q5V = parseFloat(row[columnKeys.q5]);
+                // Cluster B Metrics calculation logic validation check
                 let rowSpkVals = [];
-                if (!isNaN(q3V) && q3V >= 1 && q3V <= 6) rowSpkVals.push(q3V);
-                if (!isNaN(q4V) && q4V >= 1 && q4V <= 6) rowSpkVals.push(q4V);
-                if (!isNaN(q5V) && q5V >= 1 && q5V <= 6) rowSpkVals.push(q5V);
+                if (columnKeys.q3) { let v = parseFloat(row[columnKeys.q3]); if (!isNaN(v)) rowSpkVals.push(v); }
+                if (columnKeys.q4) { let v = parseFloat(row[columnKeys.q4]); if (!isNaN(v)) rowSpkVals.push(v); }
+                if (columnKeys.q5) { let v = parseFloat(row[columnKeys.q5]); if (!isNaN(v)) rowSpkVals.push(v); }
 
                 if (rowSpkVals.length > 0) {
                     totalSpkScore += (rowSpkVals.reduce((a, b) => a + b, 0) / rowSpkVals.length);
                     spkCount++;
                 }
 
-                // Program Comment Filters
-                const progComment = row[columnKeys.progComm];
-                if (progComment && progComment.trim() !== "") {
-                    const cleanC = progComment.trim();
-                    const lowC = cleanC.toLowerCase();
-                    if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
-                        const sent = getSentiment(cleanC);
-                        if (sent === 'positive') progPos.push(cleanC);
-                        if (sent === 'negative') progNeg.push(cleanC);
+                // Text Comments Sentiment processing modules
+                if (columnKeys.progComm) {
+                    const progComment = row[columnKeys.progComm];
+                    if (progComment && progComment.trim() !== "") {
+                        const cleanC = progComment.trim();
+                        const lowC = cleanC.toLowerCase();
+                        if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
+                            const sent = getSentiment(cleanC);
+                            if (sent === 'positive') progPos.push(cleanC);
+                            if (sent === 'negative') progNeg.push(cleanC);
+                        }
                     }
                 }
 
-                // Speaker Comment Filters
-                const spkComment = row[columnKeys.spkComm];
-                if (spkComment && spkComment.trim() !== "") {
-                    const cleanC = spkComment.trim();
-                    const lowC = cleanC.toLowerCase();
-                    if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
-                        const sent = getSentiment(cleanC);
-                        if (sent === 'positive') spkPos.push(cleanC);
-                        if (sent === 'negative') spkNeg.push(cleanC);
+                if (columnKeys.spkComm) {
+                    const spkComment = row[columnKeys.spkComm];
+                    if (spkComment && spkComment.trim() !== "") {
+                        const cleanC = spkComment.trim();
+                        const lowC = cleanC.toLowerCase();
+                        if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
+                            const sent = getSentiment(cleanC);
+                            if (sent === 'positive') spkPos.push(cleanC);
+                            if (sent === 'negative') spkNeg.push(cleanC);
+                        }
                     }
                 }
             });
