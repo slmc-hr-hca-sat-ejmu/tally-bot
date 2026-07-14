@@ -11,7 +11,7 @@
     <header class="bg-blue-600 text-white py-6 shadow-md mb-8">
         <div class="container mx-auto px-4">
             <h1 class="text-3xl font-bold flex items-center gap-2">📊 Evaluation & Sentiment Analyzer</h1>
-            <p class="text-blue-100 mt-1 text-sm md:text-base">Zero-Configuration Engine. Adaptive fallback mapping for flexible sheet structures.</p>
+            <p class="text-blue-100 mt-1 text-sm md:text-base">Adaptive Evaluation Engine. Automatically scales and conforms to any data structure layout.</p>
         </div>
     </header>
 
@@ -19,27 +19,27 @@
         
         <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 1. Paste Your Google Sheets Data</h2>
-            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The engine will map headers automatically.</p>
+            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The system automatically structures unknown surveys, identifies metric scales, and maps sentiments.</p>
             <textarea id="pasteArea" class="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste GSheets rows here..."></textarea>
             
             <div id="errorAlert" class="hidden mt-3 p-3 bg-red-100 border border-red-300 text-red-700 rounded text-sm"></div>
             
-            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer inline-flex items-center gap-2 disabled:opacity-50">
-                Clean & Process Data
+            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer inline-flex items-center gap-2">
+                <span>Clean & Process Data</span>
             </button>
         </section>
 
         <div id="dashboard" class="hidden">
             
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 border-b pb-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-2 border-b border-gray-100">
                     <div>
                         <h2 class="text-lg font-semibold text-blue-600">⏱️ 2. Isolate Present Session Window</h2>
                         <p id="rowCountLabel" class="text-gray-500 text-xs font-medium text-green-600">Processing records...</p>
                     </div>
-                    <div class="mt-2 md:mt-0">
-                        <button id="refreshBtn" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-1.5 px-4 rounded-md shadow transition-colors text-xs flex items-center gap-2 cursor-pointer disabled:opacity-50">
-                            🔄 Refresh Analytics
+                    <div>
+                        <button id="refreshBtn" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md shadow transition-colors cursor-pointer text-xs flex items-center gap-2">
+                            <span>🔄 Refresh Analytics</span>
                         </button>
                     </div>
                 </div>
@@ -120,27 +120,41 @@
     <script>
         let parsedData = [];
         let headers = [];
+        let maxScaleValue = 6.00; // Inferred scale value based on data parsing checks
         
+        // Active functional data arrays for metric groupings
+        let activeProgNumericCols = [];
+        let activeSpkNumericCols = [];
+
         let columnKeys = {
-            timestamp: "", q1: "", q2: "", progComm: "", q3: "", q4: "", q5: "", spkComm: ""
+            timestamp: "",
+            q1: "",
+            q2: "",
+            progComm: "",
+            q3: "",
+            q4: "",
+            q5: "",
+            spkComm: ""
         };
 
         const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned', 'satisfied', 'interactive', 'enjoyed'];
         const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast', 'improvement', 'improve', 'dislike'];
 
-        function toggleLoadingState(isLoading) {
+        function setGlobalLoadingState(isLoading) {
             const body = document.body;
-            const pBtn = document.getElementById('processBtn');
-            const rBtn = document.getElementById('refreshBtn');
-            
+            const processBtn = document.getElementById('processBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+
             if (isLoading) {
-                body.classList.add('cursor-wait', 'pointer-events-none');
-                if(pBtn) { pBtn.disabled = true; pBtn.innerText = "Processing Data..."; }
-                if(rBtn) { rBtn.disabled = true; rBtn.innerText = "🔄 Syncing..."; }
+                body.classList.add('cursor-wait');
+                body.style.pointerEvents = 'none';
+                if (processBtn) processBtn.innerText = "⏳ Processing Data...";
+                if (refreshBtn) refreshBtn.innerText = "⏳ Syncing View...";
             } else {
-                body.classList.remove('cursor-wait', 'pointer-events-none');
-                if(pBtn) { pBtn.disabled = false; pBtn.innerText = "Clean & Process Data"; }
-                if(rBtn) { rBtn.disabled = false; rBtn.innerText = "🔄 Refresh Analytics"; }
+                body.classList.remove('cursor-wait');
+                body.style.pointerEvents = 'auto';
+                if (processBtn) processBtn.innerText = "Clean & Process Data";
+                if (refreshBtn) refreshBtn.innerText = "🔄 Refresh Analytics";
             }
         }
 
@@ -215,23 +229,22 @@
         }
 
         document.getElementById('processBtn').addEventListener('click', () => {
-            toggleLoadingState(true);
-            
+            setGlobalLoadingState(true);
             setTimeout(() => {
-                executeProcessingPipeline();
-                toggleLoadingState(false);
-            }, 100);
+                runDataIngestionPipeline();
+                setGlobalLoadingState(false);
+            }, 80);
         });
 
         document.getElementById('refreshBtn').addEventListener('click', () => {
-            toggleLoadingState(true);
+            setGlobalLoadingState(true);
             setTimeout(() => {
                 runCalculations();
-                toggleLoadingState(false);
-            }, 100);
+                setGlobalLoadingState(false);
+            }, 80);
         });
 
-        function executeProcessingPipeline() {
+        function runDataIngestionPipeline() {
             const errorAlert = document.getElementById('errorAlert');
             errorAlert.classList.add('hidden');
 
@@ -251,7 +264,7 @@
 
             headers = rawMatrix[0].map(h => h.trim());
             
-            // 1. Check Primary Strict Matches
+            // Core standard target mappings tracking step
             columnKeys.timestamp = headers.find(h => h.toLowerCase().includes("timestamp")) || headers[0];
             columnKeys.q1 = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || "";
             columnKeys.q2 = headers.find(h => h.toLowerCase().includes("managing the program")) || "";
@@ -261,59 +274,89 @@
             columnKeys.q5 = headers.find(h => h.toLowerCase().includes("encouraged by the speaker")) || "";
             columnKeys.spkComm = headers.find(h => h.toLowerCase().includes("suggestion for the speaker")) || "";
 
-            // 2. Intelligent Adaptive Fallback Logic
-            let allocatedHeaders = Object.values(columnKeys);
-            let unallocatedHeaders = headers.filter(h => h !== columnKeys.timestamp && !allocatedHeaders.includes(h));
+            // Check if standard headers are active
+            let standardFormMatched = columnKeys.q1 || columnKeys.q3;
 
-            let detectedNumeric = [];
-            let detectedText = [];
+            // ADAPTIVE LAYOUT INFRASTRUCTURE: Structural detection fallback implementation logic
+            if (!standardFormMatched) {
+                let dynamicNumericFields = [];
+                let dynamicTextFields = [];
 
-            unallocatedHeaders.forEach(h => {
-                let colIndex = headers.indexOf(h);
-                let numericHits = 0, textHits = 0, sampledRows = 0;
+                headers.forEach((hdr) => {
+                    if (hdr === columnKeys.timestamp) return;
+                    let idx = headers.indexOf(hdr);
+                    let numberTokens = 0;
+                    let textTokens = 0;
+                    let rowsSampled = 0;
 
-                for (let r = 1; r < Math.min(rawMatrix.length, 6); r++) {
-                    if (rawMatrix[r] && rawMatrix[r][colIndex] !== undefined) {
-                        let innerVal = rawMatrix[r][colIndex].trim();
-                        if (innerVal === "") continue;
-                        sampledRows++;
-                        if (!isNaN(parseFloat(innerVal))) numericHits++;
-                        else if (innerVal.length > 2) textHits++;
+                    for (let r = 1; r < Math.min(rawMatrix.length, 12); r++) {
+                        if (rawMatrix[r] && rawMatrix[r][idx] !== undefined) {
+                            let cellVal = rawMatrix[r][idx].trim();
+                            if (cellVal === "") continue;
+                            rowsSampled++;
+                            if (!isNaN(parseFloat(cellVal))) numberTokens++;
+                            else if (cellVal.length > 2) textTokens++;
+                        }
                     }
-                }
-                if (numericHits >= textHits && sampledRows > 0) detectedNumeric.push(h);
-                else if (sampledRows > 0) detectedText.push(h);
-            });
+                    if (numberTokens >= textTokens && rowsSampled > 0) dynamicNumericFields.push(hdr);
+                    else if (rowsSampled > 0) dynamicTextFields.push(hdr);
+                });
 
-            // Map dynamically found components safely into structural variables if original locations are blank
-            let structuralFallbackUsed = false;
-            if (!columnKeys.q1 && detectedNumeric.length > 0) { columnKeys.q1 = detectedNumeric.shift(); structuralFallbackUsed = true; }
-            if (!columnKeys.q2 && detectedNumeric.length > 0) { columnKeys.q2 = detectedNumeric.shift(); structuralFallbackUsed = true; }
-            if (!columnKeys.q3 && detectedNumeric.length > 0) { columnKeys.q3 = detectedNumeric.shift(); structuralFallbackUsed = true; }
-            if (!columnKeys.q4 && detectedNumeric.length > 0) { columnKeys.q4 = detectedNumeric.shift(); structuralFallbackUsed = true; }
-            if (!columnKeys.q5 && detectedNumeric.length > 0) { columnKeys.q5 = detectedNumeric.shift(); structuralFallbackUsed = true; }
+                // Dynamically balance dynamic numerical fields into equal logical groupings
+                let midpoint = Math.ceil(dynamicNumericFields.length / 2);
+                activeProgNumericCols = dynamicNumericFields.slice(0, midpoint);
+                activeSpkNumericCols = dynamicNumericFields.slice(midpoint);
 
-            if (!columnKeys.progComm && detectedText.length > 0) columnKeys.progComm = detectedText.shift();
-            if (!columnKeys.spkComm && detectedText.length > 0) columnKeys.spkComm = detectedText.shift();
+                // Safe assignments for text properties fields fallback logic tracking structures
+                columnKeys.progComm = dynamicTextFields[0] || "";
+                columnKeys.spkComm = dynamicTextFields[1] || "";
 
-            // 3. Dynamically adjust UI configuration naming schemes
-            if (structuralFallbackUsed) {
-                document.getElementById('progCardTitle').textContent = "Evaluation Metric Block A";
-                document.getElementById('spkCardTitle').textContent = "Evaluation Metric Block B";
-                document.getElementById('progCommentHeader').textContent = "📋 Mapped Feedback Group A";
-                document.getElementById('spkCommentHeader').textContent = "📋 Mapped Feedback Group B";
+                // Alter visual dynamic layout headings cleanly
+                document.getElementById('progCardTitle').textContent = "Evaluation Blocks (Group A)";
+                document.getElementById('spkCardTitle').textContent = "Evaluation Blocks (Group B)";
+                document.getElementById('progCommentHeader').textContent = "📋 Mapped Comments (Group A)";
+                document.getElementById('spkCommentHeader').textContent = "📋 Mapped Comments (Group B)";
             } else {
+                // Restore native operational array states securely
+                activeProgNumericCols = [columnKeys.q1, columnKeys.q2].filter(Boolean);
+                activeSpkNumericCols = [columnKeys.q3, columnKeys.q4, columnKeys.q5].filter(Boolean);
+
                 document.getElementById('progCardTitle').textContent = "Program Evaluation Average";
                 document.getElementById('spkCardTitle').textContent = "Speaker Evaluation Average";
                 document.getElementById('progCommentHeader').textContent = "🏫 Program Feedback Breakdown";
                 document.getElementById('spkCommentHeader').textContent = "🎙️ Speaker Feedback Breakdown";
             }
 
-            // Clean up titles truncated nicely for sub label clarity updates
-            let subA = [columnKeys.q1, columnKeys.q2].filter(Boolean).map(x => x.length > 20 ? x.substring(0,20)+'...' : x);
-            let subB = [columnKeys.q3, columnKeys.q4, columnKeys.q5].filter(Boolean).map(x => x.length > 20 ? x.substring(0,20)+'...' : x);
-            document.getElementById('progSubLabel').textContent = subA.length > 0 ? `(Avg: ${subA.join(', ')})` : '(No numeric metrics mapped)';
-            document.getElementById('spkSubLabel').textContent = subB.length > 0 ? `(Avg: ${subB.join(', ')})` : '(No numeric metrics mapped)';
+            // DYNAMIC METRIC SCALE CALCULATOR: Scans matrix array inputs to resolve context score ceiling values
+            let detectedGlobalMax = 0;
+            let combinedMetricCols = [...activeProgNumericCols, ...activeSpkNumericCols];
+
+            for (let r = 1; r < rawMatrix.length; r++) {
+                combinedMetricCols.forEach(col => {
+                    let colIdx = headers.indexOf(col);
+                    if (colIdx !== -1 && rawMatrix[r][colIdx]) {
+                        let parsedVal = parseFloat(rawMatrix[r][colIdx]);
+                        if (!isNaN(parsedVal) && parsedVal > detectedGlobalMax) {
+                            detectedGlobalMax = parsedVal;
+                        }
+                    }
+                });
+            }
+
+            // Normalize dynamically configured grading scale properties appropriately
+            if (detectedGlobalMax <= 5.00) maxScaleValue = 5.00;
+            else if (detectedGlobalMax <= 6.00) maxScaleValue = 6.00;
+            else if (detectedGlobalMax <= 10.00) maxScaleValue = 10.00;
+            else if (detectedGlobalMax <= 100.00) maxScaleValue = 100.00;
+            else maxScaleValue = Math.ceil(detectedGlobalMax) || 6.00;
+
+            // Render descriptive structural query sublabels inside metrics layouts UI
+            document.getElementById('progSubLabel').textContent = activeProgNumericCols.length > 0 
+                ? `(Avg of: ${activeProgNumericCols.map(c => c.length > 18 ? c.substring(0, 15) + '...' : c).join(', ')})` 
+                : '(No evaluation scores detected)';
+            document.getElementById('spkSubLabel').textContent = activeSpkNumericCols.length > 0 
+                ? `(Avg of: ${activeSpkNumericCols.map(c => c.length > 18 ? c.substring(0, 15) + '...' : c).join(', ')})` 
+                : '(No evaluation scores detected)';
 
             parsedData = [];
             for (let i = 1; i < rawMatrix.length; i++) {
@@ -400,28 +443,29 @@
 
                 filteredRows.push(row);
 
-                // Cluster A Metrics calculation logic validation check
-                let rowProgVals = [];
-                if (columnKeys.q1) { let v = parseFloat(row[columnKeys.q1]); if (!isNaN(v)) rowProgVals.push(v); }
-                if (columnKeys.q2) { let v = parseFloat(row[columnKeys.q2]); if (!isNaN(v)) rowProgVals.push(v); }
-
-                if (rowProgVals.length > 0) {
-                    totalProgScore += (rowProgVals.reduce((a, b) => a + b, 0) / rowProgVals.length);
+                // Group A Multi-Metric evaluation parser calculations loop
+                let validRowProgVals = [];
+                activeProgNumericCols.forEach(colKey => {
+                    let val = parseFloat(row[colKey]);
+                    if (!isNaN(val) && val >= 0) validRowProgVals.push(val);
+                });
+                if (validRowProgVals.length > 0) {
+                    totalProgScore += (validRowProgVals.reduce((a, b) => a + b, 0) / validRowProgVals.length);
                     progCount++;
                 }
 
-                // Cluster B Metrics calculation logic validation check
-                let rowSpkVals = [];
-                if (columnKeys.q3) { let v = parseFloat(row[columnKeys.q3]); if (!isNaN(v)) rowSpkVals.push(v); }
-                if (columnKeys.q4) { let v = parseFloat(row[columnKeys.q4]); if (!isNaN(v)) rowSpkVals.push(v); }
-                if (columnKeys.q5) { let v = parseFloat(row[columnKeys.q5]); if (!isNaN(v)) rowSpkVals.push(v); }
-
-                if (rowSpkVals.length > 0) {
-                    totalSpkScore += (rowSpkVals.reduce((a, b) => a + b, 0) / rowSpkVals.length);
+                // Group B Multi-Metric evaluation parser calculations loop
+                let validRowSpkVals = [];
+                activeSpkNumericCols.forEach(colKey => {
+                    let val = parseFloat(row[colKey]);
+                    if (!isNaN(val) && val >= 0) validRowSpkVals.push(val);
+                });
+                if (validRowSpkVals.length > 0) {
+                    totalSpkScore += (validRowSpkVals.reduce((a, b) => a + b, 0) / validRowSpkVals.length);
                     spkCount++;
                 }
 
-                // Text Comments Sentiment processing modules
+                // Program Text Field Mapping & Sentiment Analysis block execution
                 if (columnKeys.progComm) {
                     const progComment = row[columnKeys.progComm];
                     if (progComment && progComment.trim() !== "") {
@@ -435,6 +479,7 @@
                     }
                 }
 
+                // Speaker Text Field Mapping & Sentiment Analysis block execution
                 if (columnKeys.spkComm) {
                     const spkComment = row[columnKeys.spkComm];
                     if (spkComment && spkComment.trim() !== "") {
@@ -452,8 +497,9 @@
             const finalProgAvg = progCount > 0 ? (totalProgScore / progCount).toFixed(2) : "0.00";
             const finalSpkAvg = spkCount > 0 ? (totalSpkScore / spkCount).toFixed(2) : "0.00";
 
-            document.getElementById('progScoreDisplay').textContent = `${finalProgAvg} / 6.00`;
-            document.getElementById('spkScoreDisplay').textContent = `${finalSpkAvg} / 6.00`;
+            // Print calculated evaluation arrays paired alongside dynamically set maximum scale context properties
+            document.getElementById('progScoreDisplay').textContent = `${finalProgAvg} / ${maxScaleValue.toFixed(2)}`;
+            document.getElementById('spkScoreDisplay').textContent = `${finalSpkAvg} / ${maxScaleValue.toFixed(2)}`;
 
             document.getElementById('rowCountLabel').textContent = `Showing analytics for selected window: ${selectedDateValue} between ${startTimeVal} and ${endTimeVal} (${filteredRows.length} rows inside bracket).`;
 
