@@ -3,34 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSheets Evaluation & Sentiment Analyzer</title>
+    <title>Dynamic GSheets Evaluation & Sentiment Analyzer</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen pb-12">
 
     <header class="bg-blue-600 text-white py-6 shadow-md mb-8">
-        <div class="container mx-auto px-4">
-            <h1 class="text-3xl font-bold flex items-center gap-2">📊 Evaluation & Sentiment Analyzer</h1>
-            <p class="text-blue-100 mt-1 text-sm md:text-base">Zero-Configuration Engine. Hardcoded mapping for your specific evaluation forms (Out of 6.00).</p>
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-3xl font-bold flex items-center gap-2">📊 Dynamic Evaluation Analyzer</h1>
+            <p class="text-blue-100 mt-1 text-sm md:text-base">Define your column headers below, then paste your data. Calculate Averages or Sentiments automatically.</p>
         </div>
     </header>
 
     <main class="container mx-auto px-4 max-w-6xl">
         
+        <!-- STEP 1: DEFINE COLUMNS -->
         <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-            <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 1. Paste Your Google Sheets Data</h2>
-            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below. The system will align columns and isolate your session windows cleanly.</p>
-            <textarea id="pasteArea" class="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste GSheets rows here..."></textarea>
+            <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">⚙️ 1. Define Columns to Analyze</h2>
+            <p class="text-gray-500 text-xs mb-4">Add multiple boxes below. Type the exact (or partial) Column Header from your sheet, and choose what type of analysis to run.</p>
+            
+            <div class="bg-gray-50 p-4 border border-gray-200 rounded-md mb-4">
+                <label class="block text-xs font-bold text-gray-700 mb-1">Timestamp Column Header (Optional, for Session Filtering)</label>
+                <input type="text" id="timestampHeaderInput" value="Timestamp" class="w-full md:w-1/2 p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500" placeholder="e.g. Timestamp">
+            </div>
+
+            <div id="config-container" class="space-y-3 mb-4">
+                <!-- Dynamic configuration rows will be injected here by JS -->
+            </div>
+            
+            <button id="addMetricBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors text-sm shadow-sm cursor-pointer">+ Add Another Column to Analyze</button>
+        </section>
+
+        <!-- STEP 2: PASTE DATA -->
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+            <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">📋 2. Paste Your Google Sheets Data</h2>
+            <p class="text-gray-500 text-xs mb-4">Highlight your entire sheet contents (Ctrl+A), copy (Ctrl+C), and paste below.</p>
+            <textarea id="pasteArea" class="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste all GSheets rows here (including the top header row)..."></textarea>
             
             <div id="errorAlert" class="hidden mt-3 p-3 bg-red-100 border border-red-300 text-red-700 rounded text-sm"></div>
             
-            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer">Clean & Process Data</button>
+            <button id="processBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition-colors cursor-pointer text-lg w-full md:w-auto">🚀 Process & Analyze Data</button>
         </section>
 
+        <!-- STEP 3: DASHBOARD -->
         <div id="dashboard" class="hidden">
             
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-                <h2 class="text-lg font-semibold mb-1 text-blue-600">⏱️ 2. Isolate Present Session Window</h2>
+                <h2 class="text-lg font-semibold mb-1 text-blue-600">⏱️ Active Session Window</h2>
                 <p id="rowCountLabel" class="text-gray-500 text-xs mb-4 font-medium text-green-600">Processing records...</p>
                 
                 <div class="p-4 bg-blue-50 border border-blue-200 rounded-md grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -49,81 +68,97 @@
                 </div>
             </section>
 
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-blue-500 border-gray-200 text-center">
-                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Program Evaluation Average</span>
-                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q1 & Q2)</h3>
-                    <div id="progScoreDisplay" class="text-4xl font-extrabold text-blue-600 mt-2">0.00 / 6.00</div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-l-4 border-l-purple-500 border-gray-200 text-center">
-                    <span class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Speaker Evaluation Average</span>
-                    <h3 class="text-xs text-gray-400 mt-1">(Average of Q3, Q4, & Q5)</h3>
-                    <div id="spkScoreDisplay" class="text-4xl font-extrabold text-purple-600 mt-2">0.00 / 6.00</div>
-                </div>
-            </section>
-
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🏫 Program Feedback Breakdown</h2>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Comments (<span id="progPosCount">0</span>)</h3>
-                            <ul id="progPosList" class="space-y-2 text-xs text-emerald-950 list-disc list-inside"></ul>
-                        </div>
-                        <div class="bg-rose-50 p-4 rounded-md border border-rose-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-rose-800 text-sm mb-2">🔴 Negative Comments (<span id="progNegCount">0</span>)</h3>
-                            <ul id="progNegList" class="space-y-2 text-xs text-rose-950 list-disc list-inside"></ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">🎙️ Speaker Feedback Breakdown</h2>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Comments (<span id="spkPosCount">0</span>)</h3>
-                            <ul id="spkPosList" class="space-y-2 text-xs text-emerald-950 list-disc list-inside"></ul>
-                        </div>
-                        <div class="bg-rose-50 p-4 rounded-md border border-rose-100 max-h-80 overflow-y-auto">
-                            <h3 class="font-bold text-rose-800 text-sm mb-2">🔴 Negative Comments (<span id="spkNegCount">0</span>)</h3>
-                            <ul id="spkNegList" class="space-y-2 text-xs text-rose-950 list-disc list-inside"></ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <!-- Dynamic Results Container -->
+            <div id="dynamicResultsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Score Cards and Sentiment Breakdown generated by JS will go here -->
+            </div>
 
             <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
                 <h2 class="text-lg font-bold text-gray-700 mb-2">📋 Live Data Preview Table (Active Window Only)</h2>
-                <p class="text-gray-500 text-xs mb-4">Showing filtered response records inside your specified active time parameters.</p>
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse text-xs mt-4">
                     <thead>
                         <tr id="tableHeaderRow" class="bg-gray-100 text-gray-700 border-b border-gray-200"></tr>
                     </thead>
                     <tbody id="tableBodyData" class="divide-y divide-gray-100"></tbody>
                 </table>
             </section>
-
         </div>
     </main>
 
     <script>
+        // --- 1. Dynamic Configuration State ---
+        let metricConfigs = [
+            { id: 1, headerText: "achieve its objectives", type: "score" },
+            { id: 2, headerText: "presented effectively", type: "score" },
+            { id: 3, headerText: "improve the program", type: "sentiment" }
+        ];
+
+        function renderConfigUI() {
+            const container = document.getElementById('config-container');
+            container.innerHTML = '';
+            metricConfigs.forEach((config, index) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col md:flex-row gap-3 items-end md:items-center bg-white p-3 border border-gray-200 rounded shadow-sm";
+                
+                row.innerHTML = `
+                    <div class="w-full md:w-1/2">
+                        <label class="block text-xs text-gray-500 mb-1">Column Header (Keywords)</label>
+                        <input type="text" value="${config.headerText}" data-id="${config.id}" class="config-header w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. Program Rating">
+                    </div>
+                    <div class="w-full md:w-1/3">
+                        <label class="block text-xs text-gray-500 mb-1">Analysis Type</label>
+                        <select data-id="${config.id}" class="config-type w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="score" ${config.type === 'score' ? 'selected' : ''}>Numeric Score (Average)</option>
+                            <option value="sentiment" ${config.type === 'sentiment' ? 'selected' : ''}>Text Feedback (Pos/Neg)</option>
+                        </select>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <button data-id="${config.id}" class="remove-config-btn w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 px-3 rounded text-sm transition-colors cursor-pointer text-center">✕ Remove</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            // Attach event listeners for inputs & deletes
+            document.querySelectorAll('.config-header').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    const conf = metricConfigs.find(c => c.id === id);
+                    if(conf) conf.headerText = e.target.value;
+                });
+            });
+            document.querySelectorAll('.config-type').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    const conf = metricConfigs.find(c => c.id === id);
+                    if(conf) conf.type = e.target.value;
+                });
+            });
+            document.querySelectorAll('.remove-config-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    metricConfigs = metricConfigs.filter(c => c.id !== id);
+                    renderConfigUI();
+                });
+            });
+        }
+
+        document.getElementById('addMetricBtn').addEventListener('click', () => {
+            metricConfigs.push({ id: Date.now(), headerText: "", type: "score" });
+            renderConfigUI();
+        });
+
+        // Initialize UI
+        renderConfigUI();
+
+        // --- 2. Data Processing & Parsing Logic ---
         let parsedData = [];
         let headers = [];
-        
-        // Target structural column headers mapped statically inside code logic execution
-        let columnKeys = {
-            timestamp: "",
-            q1: "",
-            q2: "",
-            progComm: "",
-            q3: "",
-            q4: "",
-            q5: "",
-            spkComm: ""
-        };
+        let timestampColumnMatched = "";
+        let matchedConfigHeaders = {}; // Maps Config ID to actual parsed sheet header
 
-        const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned', 'satisfied', 'interactive', 'enjoyed'];
-        const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast', 'improvement', 'improve', 'dislike'];
+        const posWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'well', 'clear', 'loved', 'perfect', 'awesome', 'informative', 'effective', 'nice', 'engaging', 'learned', 'satisfied', 'interactive', 'enjoyed', 'best', 'superb'];
+        const negWords = ['bad', 'poor', 'boring', 'unclear', 'slow', 'confused', 'terrible', 'hard', 'difficult', 'waste', 'disorganized', 'lacked', 'loud', 'soft', 'fast', 'improvement', 'improve', 'dislike', 'none'];
 
         function getSentiment(text) {
             if (!text || text.trim() === "") return 'neutral';
@@ -163,18 +198,12 @@
             let currentRow = [];
             let currentCell = '';
             let insideQuotes = false;
-
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
                 let nextChar = text[i + 1];
-
                 if (char === '"') {
-                    if (insideQuotes && nextChar === '"') {
-                        currentCell += '"';
-                        i++;
-                    } else {
-                        insideQuotes = !insideQuotes;
-                    }
+                    if (insideQuotes && nextChar === '"') { currentCell += '"'; i++; } 
+                    else { insideQuotes = !insideQuotes; }
                 } else if (char === '\t' && !insideQuotes) {
                     currentRow.push(currentCell.trim());
                     currentCell = '';
@@ -184,9 +213,7 @@
                     rows.push(currentRow);
                     currentRow = [];
                     currentCell = '';
-                } else {
-                    currentCell += char;
-                }
+                } else { currentCell += char; }
             }
             if (currentCell || currentRow.length > 0) {
                 currentRow.push(currentCell.trim());
@@ -195,6 +222,7 @@
             return rows;
         }
 
+        // --- 3. Execute Analysis ---
         document.getElementById('processBtn').addEventListener('click', () => {
             const errorAlert = document.getElementById('errorAlert');
             errorAlert.classList.add('hidden');
@@ -208,49 +236,36 @@
 
             const rawMatrix = robustTSVParser(rawText);
             if (rawMatrix.length < 2) {
-                errorAlert.textContent = "Data structure issue. Ensure you've highlighted the top row headers along with data entries.";
+                errorAlert.textContent = "Data structure issue. Ensure you highlighted the top row headers along with data entries.";
                 errorAlert.classList.remove('hidden');
                 return;
             }
 
             headers = rawMatrix[0].map(h => h.trim());
             
-            // Auto-align structural references cleanly using case-insensitive target keyword mapping checks
-            columnKeys.timestamp = headers.find(h => h.toLowerCase().includes("timestamp")) || headers[0];
-            columnKeys.q1 = headers.find(h => h.toLowerCase().includes("achieve its objectives")) || "";
-            columnKeys.q2 = headers.find(h => h.toLowerCase().includes("managing the program")) || "";
-            columnKeys.progComm = headers.find(h => h.toLowerCase().includes("improve the program")) || "";
-            columnKeys.q3 = headers.find(h => h.toLowerCase().includes("presented effectively")) || "";
-            columnKeys.q4 = headers.find(h => h.toLowerCase().includes("knowledgeable of the subject")) || "";
-            columnKeys.q5 = headers.find(h => h.toLowerCase().includes("encouraged by the speaker")) || "";
-            columnKeys.spkComm = headers.find(h => h.toLowerCase().includes("suggestion for the speaker")) || "";
+            // Map the configured headers dynamically
+            matchedConfigHeaders = {};
+            metricConfigs.forEach(config => {
+                if(config.headerText.trim() === "") return;
+                // Find first column header that includes the typed keywords
+                const foundHeader = headers.find(h => h.toLowerCase().includes(config.headerText.toLowerCase().trim()));
+                matchedConfigHeaders[config.id] = foundHeader || null;
+            });
 
-            // Structural Validation Alert Warning
-            if (!columnKeys.q1 || !columnKeys.q3) {
-                errorAlert.textContent = "Warning: App could not find matching header texts. Verify columns mirror your setup criteria exactly.";
-                errorAlert.classList.remove('hidden');
-            }
+            // Map Timestamp
+            const tsInput = document.getElementById('timestampHeaderInput').value.trim();
+            timestampColumnMatched = headers.find(h => h.toLowerCase().includes(tsInput.toLowerCase())) || headers[0];
 
+            // Parse valid rows
             parsedData = [];
             for (let i = 1; i < rawMatrix.length; i++) {
                 const cells = rawMatrix[i];
                 if (cells.length === 0 || cells.every(c => c === "")) continue; 
-
                 let rowObj = {};
-                let hasValidContent = false;
-                
                 headers.forEach((header, idx) => {
-                    let cellVal = cells[idx] ? cells[idx].trim() : "";
-                    rowObj[header] = cellVal;
-                    if (cellVal !== "") hasValidContent = true;
+                    rowObj[header] = cells[idx] ? cells[idx].trim() : "";
                 });
-
-                const firstCellVal = (cells[0] || "").toLowerCase();
-                const isSummary = firstCellVal.includes("total") || firstCellVal.includes("average") || firstCellVal.includes("mean");
-
-                if (hasValidContent && !isSummary) {
-                    parsedData.push(rowObj);
-                }
+                parsedData.push(rowObj);
             }
 
             updateSessionDropdownOptions();
@@ -258,6 +273,7 @@
             document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
         });
 
+        // Event listeners for session filters
         document.getElementById('active_session_filter').addEventListener('change', runCalculations);
         document.getElementById('startTimeFilter').addEventListener('change', runCalculations);
         document.getElementById('endTimeFilter').addEventListener('change', runCalculations);
@@ -268,135 +284,136 @@
 
             let uniqueDates = new Set();
             parsedData.forEach(row => {
-                let parsed = parseTimestamp(row[columnKeys.timestamp]);
+                let parsed = parseTimestamp(row[timestampColumnMatched]);
                 if (parsed.date !== "") uniqueDates.add(parsed.date);
             });
 
             let sortedDates = Array.from(uniqueDates).sort();
-
             if(sortedDates.length === 0) {
                 const opt = document.createElement('option');
                 opt.value = "";
                 opt.textContent = "No valid dates found";
                 filterDropdown.appendChild(opt);
-                return;
-            }
-
-            sortedDates.forEach(dateStr => {
-                const opt = document.createElement('option');
-                opt.value = dateStr;
-                opt.textContent = `Date: ${dateStr}`;
-                filterDropdown.appendChild(opt);
-            });
-
-            if(filterDropdown.options.length > 0) {
+            } else {
+                sortedDates.forEach(dateStr => {
+                    const opt = document.createElement('option');
+                    opt.value = dateStr;
+                    opt.textContent = `Date: ${dateStr}`;
+                    filterDropdown.appendChild(opt);
+                });
                 filterDropdown.selectedIndex = filterDropdown.options.length - 1;
             }
-
             runCalculations();
         }
 
+        // --- 4. Render Dynamic Dashboard ---
         function runCalculations() {
             const selectedDateValue = document.getElementById('active_session_filter').value;
             const startTimeVal = document.getElementById('startTimeFilter').value; 
             const endTimeVal = document.getElementById('endTimeFilter').value;     
 
-            let totalProgScore = 0, progCount = 0;
-            let totalSpkScore = 0, spkCount = 0;
-
-            const progPos = [], progNeg = [];
-            const spkPos = [], spkNeg = [];
-            let filteredRows = [];
-
-            parsedData.forEach(row => {
-                let parsed = parseTimestamp(row[columnKeys.timestamp]);
-                
-                if (parsed.date !== selectedDateValue) return;
-                if (parsed.time24 < startTimeVal || parsed.time24 > endTimeVal) return;
-
-                filteredRows.push(row);
-
-                // Program Evaluation Metrics calculation
-                const q1V = parseFloat(row[columnKeys.q1]);
-                const q2V = parseFloat(row[columnKeys.q2]);
-                let rowProgVals = [];
-                if (!isNaN(q1V) && q1V >= 1 && q1V <= 6) rowProgVals.push(q1V);
-                if (!isNaN(q2V) && q2V >= 1 && q2V <= 6) rowProgVals.push(q2V);
-
-                if (rowProgVals.length > 0) {
-                    totalProgScore += (rowProgVals.reduce((a, b) => a + b, 0) / rowProgVals.length);
-                    progCount++;
-                }
-
-                // Speaker Evaluation Metrics calculation
-                const q3V = parseFloat(row[columnKeys.q3]);
-                const q4V = parseFloat(row[columnKeys.q4]);
-                const q5V = parseFloat(row[columnKeys.q5]);
-                let rowSpkVals = [];
-                if (!isNaN(q3V) && q3V >= 1 && q3V <= 6) rowSpkVals.push(q3V);
-                if (!isNaN(q4V) && q4V >= 1 && q4V <= 6) rowSpkVals.push(q4V);
-                if (!isNaN(q5V) && q5V >= 1 && q5V <= 6) rowSpkVals.push(q5V);
-
-                if (rowSpkVals.length > 0) {
-                    totalSpkScore += (rowSpkVals.reduce((a, b) => a + b, 0) / rowSpkVals.length);
-                    spkCount++;
-                }
-
-                // Program Comment Filters
-                const progComment = row[columnKeys.progComm];
-                if (progComment && progComment.trim() !== "") {
-                    const cleanC = progComment.trim();
-                    const lowC = cleanC.toLowerCase();
-                    if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
-                        const sent = getSentiment(cleanC);
-                        if (sent === 'positive') progPos.push(cleanC);
-                        if (sent === 'negative') progNeg.push(cleanC);
-                    }
-                }
-
-                // Speaker Comment Filters
-                const spkComment = row[columnKeys.spkComm];
-                if (spkComment && spkComment.trim() !== "") {
-                    const cleanC = spkComment.trim();
-                    const lowC = cleanC.toLowerCase();
-                    if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
-                        const sent = getSentiment(cleanC);
-                        if (sent === 'positive') spkPos.push(cleanC);
-                        if (sent === 'negative') spkNeg.push(cleanC);
-                    }
-                }
+            // Filter active rows by date/time
+            let filteredRows = parsedData.filter(row => {
+                let parsed = parseTimestamp(row[timestampColumnMatched]);
+                if (parsed.date !== selectedDateValue && selectedDateValue !== "") return false;
+                if (parsed.time24 < startTimeVal || parsed.time24 > endTimeVal) return false;
+                return true;
             });
 
-            const finalProgAvg = progCount > 0 ? (totalProgScore / progCount).toFixed(2) : "0.00";
-            const finalSpkAvg = spkCount > 0 ? (totalSpkScore / spkCount).toFixed(2) : "0.00";
+            document.getElementById('rowCountLabel').textContent = `Showing analytics for window: ${selectedDateValue} between ${startTimeVal} and ${endTimeVal} (${filteredRows.length} rows inside bracket).`;
 
-            document.getElementById('progScoreDisplay').textContent = `${finalProgAvg} / 6.00`;
-            document.getElementById('spkScoreDisplay').textContent = `${finalSpkAvg} / 6.00`;
+            // Clear Dynamic Results
+            const resultsContainer = document.getElementById('dynamicResultsContainer');
+            resultsContainer.innerHTML = '';
 
-            document.getElementById('rowCountLabel').textContent = `Showing analytics for selected window: ${selectedDateValue} between ${startTimeVal} and ${endTimeVal} (${filteredRows.length} rows inside bracket).`;
+            // Process each configured block
+            metricConfigs.forEach(config => {
+                if (config.headerText.trim() === "") return;
+                
+                const actualHeader = matchedConfigHeaders[config.id];
+                
+                if (!actualHeader) {
+                    // Header not found in pasted data
+                    resultsContainer.innerHTML += `
+                        <div class="bg-red-50 p-6 rounded-lg shadow-sm border border-red-200">
+                            <h3 class="text-sm uppercase tracking-wider text-red-500 font-semibold mb-2">Column Not Found</h3>
+                            <p class="text-xs text-red-700">Could not find any column matching: "<b>${config.headerText}</b>"</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            updateListDisplay('progPosList', 'progPosCount', progPos);
-            updateListDisplay('progNegList', 'progNegCount', progNeg);
-            updateListDisplay('spkPosList', 'spkPosCount', spkPos);
-            updateListDisplay('spkNegList', 'spkNegCount', spkNeg);
+                if (config.type === 'score') {
+                    // CALCULATE SCORE
+                    let totalScore = 0;
+                    let validCount = 0;
+                    
+                    filteredRows.forEach(row => {
+                        const val = parseFloat(row[actualHeader]);
+                        if (!isNaN(val) && val >= 1 && val <= 100) { 
+                            totalScore += val;
+                            validCount++;
+                        }
+                    });
+
+                    const avg = validCount > 0 ? (totalScore / validCount).toFixed(2) : "0.00";
+                    
+                    resultsContainer.innerHTML += `
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-t-blue-500 border-gray-200 text-center flex flex-col justify-center">
+                            <span class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-1">Average Score</span>
+                            <h3 class="text-sm text-gray-700 font-semibold truncate px-4" title="${actualHeader}">${actualHeader}</h3>
+                            <div class="text-4xl font-extrabold text-blue-600 mt-4">${avg}</div>
+                            <span class="text-xs text-gray-400 mt-1">Based on ${validCount} valid numerical entries</span>
+                        </div>
+                    `;
+                } 
+                else if (config.type === 'sentiment') {
+                    // CALCULATE SENTIMENT
+                    let posComments = [];
+                    let negComments = [];
+                    
+                    filteredRows.forEach(row => {
+                        const text = row[actualHeader];
+                        if (text && text.trim() !== "") {
+                            const cleanText = text.trim();
+                            const lowC = cleanText.toLowerCase();
+                            if (lowC !== "none" && lowC !== "n/a" && lowC !== "nil" && lowC !== "-") {
+                                const sent = getSentiment(cleanText);
+                                if (sent === 'positive') posComments.push(cleanText);
+                                if (sent === 'negative') negComments.push(cleanText);
+                            }
+                        }
+                    });
+
+                    // Build Sentiment Block
+                    const posHTML = posComments.length > 0 
+                        ? posComments.map(c => `<li class="p-2 bg-white rounded shadow-sm border border-emerald-100 text-gray-700 leading-relaxed break-words">${c}</li>`).join('') 
+                        : `<li class="list-none text-gray-400 italic">No positive signals found.</li>`;
+                        
+                    const negHTML = negComments.length > 0 
+                        ? negComments.map(c => `<li class="p-2 bg-white rounded shadow-sm border border-rose-100 text-gray-700 leading-relaxed break-words">${c}</li>`).join('') 
+                        : `<li class="list-none text-gray-400 italic">No negative signals found.</li>`;
+
+                    resultsContainer.innerHTML += `
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-t-purple-500 border-gray-200 col-span-1 lg:col-span-2">
+                            <span class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-1 block">Sentiment Breakdown</span>
+                            <h3 class="text-md font-bold text-gray-700 mb-4 border-b pb-2 truncate" title="${actualHeader}">${actualHeader}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-emerald-50 p-4 rounded-md border border-emerald-100 max-h-80 overflow-y-auto">
+                                    <h4 class="font-bold text-emerald-800 text-sm mb-2">🟢 Positive Elements (${posComments.length})</h4>
+                                    <ul class="space-y-2 text-xs text-emerald-950">${posHTML}</ul>
+                                </div>
+                                <div class="bg-rose-50 p-4 rounded-md border border-rose-100 max-h-80 overflow-y-auto">
+                                    <h4 class="font-bold text-rose-800 text-sm mb-2">🔴 Constructive/Negative Elements (${negComments.length})</h4>
+                                    <ul class="space-y-2 text-xs text-rose-950">${negHTML}</ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
 
             renderPreviewTable(filteredRows);
-        }
-
-        function updateListDisplay(listId, countId, itemsArr) {
-            document.getElementById(countId).textContent = itemsArr.length;
-            const listEl = document.getElementById(listId);
-            listEl.innerHTML = '';
-            if (itemsArr.length === 0) {
-                listEl.innerHTML = `<li class="list-none text-gray-400 italic">No comments matching this criteria found for this specific time bracket.</li>`;
-                return;
-            }
-            itemsArr.forEach(txt => {
-                const li = document.createElement('li');
-                li.className = "p-2 bg-white rounded shadow-2xs border border-gray-100 text-gray-700 leading-relaxed break-words";
-                li.textContent = txt;
-                listEl.appendChild(li);
-            });
         }
 
         function renderPreviewTable(activeRows) {
